@@ -1,16 +1,20 @@
-package csci150
+package csci152
 
-import "net/http"
+import (
+		"html/template"
+		"net/http"
+)
 
 func init() {
 	configureResourceLocation("images", "img")
 	configureResourceLocation("css", "css")
 	configureResourceLocation("images", "js/images")
 	configureResourceLocation("js", "js")
-	// setUserDefault()
+	setUserDefault()
+	// http.Handle("/favicon.ico", http.NotFoundHandler()) // ignore favicon request (error 404)
+	http.HandleFunc("/", pageMain) // main page.
 
-	// http.HandleFunc("/count", pageTest)
-	// tpl = template.Must(template.ParseGlob("html/*.html"))
+	tpl = template.Must(template.ParseGlob("html/*.html"))
 }
 
 // map resource physical location to href relative location.
