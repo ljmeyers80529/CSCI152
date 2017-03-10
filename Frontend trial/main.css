@@ -1,59 +1,53 @@
+
+/*changes to body done here, default stuff,*/
 body{
-    margin: 0;
-    background: #222;
+    margin:0;
+    background: #222; /*body background color*/
     font-family: sans-serif;
     color: white;
-    font-weight: 400;
+    font-weight: 400; /*changes thickness of font*/
 }
 
-.container{
-    width: 100%;
-    margin: 0 auto;
-}
 
+
+/*header is a heade, meant for head stuff*/
 header{
-    width: 100%;
-    position:fixed;
-    background: #55d6aa;
-    top:0;
-    opacity: .6;
+    width: 100%; /*take 100% width of page */
+    position:fixed; /*keep header in place as you scroll*/
+    background: #55d6aa; /*change color of header*/
+    top:0px; /*star at 0 position from top */
+    opacity: .6; /*trasperency*/
 }
 
-header::after{
-    content: '';
-    display: table;
-    clear: both;
-}
-
-
-
-.logo{
+/*fucks wit logo on nav bar */
+#navlogo{
     float: left;
     height: 50px;
     width: 50px;
 }
 
-nav{
+/*pushes stuff to right side of nav bar, unless told otherwise (logocase)*/
+.nav{
     float: right;
 }
 
-
-nav ul{
-    padding: 0;
-    margin: 0;
-    list-style: none;
-    padding-left: 10px;
+/*messes with list in general*/
+.nav ul{
+    margin: 0; /*no space around it, important for positioning of list */
+    list-style: none; /*take off default list bullet points/underlining*/
 }
 
-nav li{
-    display: inline-block;
-    margin-left: 50px;
-    padding-top: 15px;
+/*messes with whats inside of list*/
+.nav li{
+    display: inline-block; /*puts list items in a row, instead of column */
+    margin-left: 50px; /*spacing between list items */
+    padding-top: 15px; /*pushes items in list a bit down, not so close to top of page*/
 
     position: relative;
 }
 
-nav a::before{
+
+.nav a::before{
     content: '';
     display: block;
     height: 5px;
@@ -66,24 +60,24 @@ nav a::before{
     -webkit-transition: ease-in-out 250ms;
 }
 
-nav a:hover::before{
+.nav a:hover::before{ /*goes along with code right above, sets width of animated underline*/
     width: 100%;
 }
 
 
-nav a{
+.nav a{  /*messes with text on nav*/
     color: #444;
     text-decoration: none;
     font-family: "Old English Text MT";
 }
 
-nav a:hover{
-
+/*color when hovering over text on nav*/
+.nav a:hover{
     color: #000;
-
 }
 
-#homepage{
+/*start homepage section 70px from the top*/
+.homepage{
     margin-top: 70px;
 }
 
@@ -98,12 +92,13 @@ nav a:hover{
 
 }
 
-
-#homepage{
+/*centering text to center of page*/
+.homepage{
     text-align: center;
 }
 
-#homepage img{
+/*messes with big logo on hompage*/
+.homepage img{
     align-content: center;
     width:30%;
     height: 30%;
