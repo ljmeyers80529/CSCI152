@@ -2,10 +2,8 @@ package csci152
 
 import (
 	"html/template"
-	// "log"
 	"net/http"
 
-	"github.com/zmb3/spotify"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 )
@@ -17,10 +15,6 @@ func init() {
 	configureResourceLocation("js", "js")
 	setUserDefault()
 	// http.Handle("/favicon.ico", http.NotFoundHandler()) // ignore favicon request (error 404)
-
-	auth = spotify.NewAuthenticator(retrieveURI, spotify.ScopeUserReadPrivate)
-	auth.SetAuthInfo(clientID, spotKey)
-	baseURL = auth.AuthURL(spotStateValue)
 
 	http.HandleFunc("/", pageMain) // main page.
 	http.HandleFunc("/callback", completeAuth)
@@ -39,10 +33,10 @@ func configureResourceLocation(phyDir, hrefDir string) {
 
 func completeAuth(res http.ResponseWriter, req *http.Request) {
 	ctx := appengine.NewContext(req)
-	_, err := auth.Token(spotStateValue, req)
-	if err != nil {
-		http.Error(res, "Couldn't get token", http.StatusForbidden)
-		log.Errorf(ctx, "Error %v", err)
-	}
-	log.Infof(ctx, "Created")
+	log.Infof(ctx, "Callback executed")
+	// _, err := auth.Token(spotStateValue, req)
+	// if err != nil {
+	// 	http.Error(res, "Couldn't get token", http.StatusForbidden)
+	// 	log.Errorf(ctx, "Error %v", err)
+	// }
 }

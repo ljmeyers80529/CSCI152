@@ -13,6 +13,7 @@ import (
 func pageMain(res http.ResponseWriter, req *http.Request) {
 	// ctx := appengine.NewContext(req)
 	readCookie(res, req) // maintain user login / out state.apikey
+	initSpotify(res, req);
 	// popWatch(ctx)
 
 	// if req.Method == "POST" {
