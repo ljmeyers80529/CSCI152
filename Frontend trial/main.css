@@ -103,3 +103,44 @@ header{
     width:30%;
     height: 30%;
 }
+
+
+
+.dropdown-content {
+    opacity: .6;
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+
+.dropdown-content a::before{
+
+    content: '';
+    display: block;
+    height: 5px;
+    background-color: #444;
+
+    position: relative;
+    top: 30px;
+    width: 0%;
+
+    -webkit-transition: ease-in-out 250ms;
+
+}
+
+
+.dropdown-content a {
+    color: #444;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
