@@ -15,7 +15,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
-	// "google.golang.org/appengine/log"
+	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/memcache"
 )
 
@@ -63,11 +63,13 @@ func WriteNewUserInformation(res http.ResponseWriter, req *http.Request) (regist
 	ctx := appengine.NewContext(req)
 	pass := req.FormValue("newpassword")
 	conf := req.FormValue("confirm")
-	fn := req.FormValue("fullname")
+	spot := req.FormValue("spotifyaccount")
 	un := req.FormValue("newusername")
+
+	log.Infof(ctx,"V1 = %v\tV2 = %v\tV3 = %v\tV4 = %v", pass, conf, spot, un)
 	names.Name = un
 
-	if pass == conf && fn != "" && un != "" {
+	if pass == conf && spot != "" && un != "" {
 		uid, _ := generateUUID()
 		names = dictionaryUserName{
 			Name: un,
@@ -75,7 +77,7 @@ func WriteNewUserInformation(res http.ResponseWriter, req *http.Request) (regist
 		}
 		userInformation = userInformationType{
 			UserID:   uid,
-			Name:     fn,
+			SpotifyAccount:     spot,
 			Password: EncryptPassword(pass),
 			Username: un,
 			LoggedIn: true,

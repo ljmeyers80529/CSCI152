@@ -7,7 +7,6 @@ import (
 )
 
 func pageLogin(res http.ResponseWriter, req *http.Request) {
-	// ctx := appengine.NewContext(req)
 	if req.Method == "POST" {
 		fn := req.FormValue("cmdbutton")
 		switch fn {
