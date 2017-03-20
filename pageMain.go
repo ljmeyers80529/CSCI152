@@ -8,6 +8,7 @@ import (
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
+	// "google.golang.org/appengine/log"
 )
 
 // main (top) web page.
@@ -16,10 +17,11 @@ func pageMain(res http.ResponseWriter, req *http.Request) {
 	readCookie(res, req) // maintain user login / out state.apikey
 	log.Infof(ctx, "Cookie = %v", webInformation.User)
 	if webInformation.User.LoggedIn {
-		log.Infof(ctx,"%s", "Loggedin")
-		// http.Redirect(res, req, "/home", http.StatusSeeOther)
+		// log.Infof(ctx,"%s", "Loggedin")
+		http.Redirect(res, req, "/home", http.StatusSeeOther)
 	} else {
-		log.Infof(ctx,"%s", "Needs to Loggedin")
+		// log.Infof(ctx,"%s", "Needs to Loggedin")
+		http.Redirect(res, req, "/login", http.StatusSeeOther)
 		// userLogin(res, req)
 	}
 
@@ -59,7 +61,7 @@ func pageMain(res http.ResponseWriter, req *http.Request) {
 	// 	}
 	// 	executeSearch(res, req)
 	// }
-	tpl.ExecuteTemplate(res, "index.html", webInformation)
+	// tpl.ExecuteTemplate(res, "index.html", webInformation)
 }
 
 // // get watch items.
