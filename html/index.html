@@ -2,13 +2,11 @@
 <html lang="en">
 
 <head>
-    <link rel="icon" type="image/ico" sizes="32x32" href="../images/diningphilo.ico">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'  type='text/css'>
-    <title>release.it</title>
+    <link rel="icon" type="image/ico" sizes="32x32" href="../images/music.ico">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <title>Tast Test</title>
     <link rel="stylesheet" type="text/css" href="../css/main.css">
-    <link rel="stylesheet" type="text/css" href="../css/movies.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="../js/countdown.js" type="text/javascript"></script>
     <style>
         #homepage {
             visibility: hidden;
@@ -28,52 +26,52 @@
         </div>
         <center>
             <form method="POST">
-                    <div class="SearchBar">
-                        <input id="s" type="text" name="search" placeholder="Search...">
-                        <button class="specify" name="cmdSearch" value="movies_tv">Search</button>
-                    </div>
+                <div class="SearchBar">
+                    <input id="s" type="text" name="search" placeholder="Search...">
+                    <button class="specify" name="cmdSearch" value="movies_tv">Search</button>
+                </div>
                 <div id="mass">
                     {{if .User.LoggedIn}} {{if .Watched}}
                     <table style="font-size: 1.25rem">
                         <thead style="font-size: 1rem">
                             <td>
-                               <center>
-                                <text class="detail">Detail</text>
+                                <center>
+                                    <text class="detail">Detail</text>
                                 </center>
                             </td>
                             <td>
                                 <center>
-                                <text class="detail">Title</text>
+                                    <text class="detail">Title</text>
                                 </center>
                             </td>
                             <td>
                                 <center>
-                                <text class="detail">Rating</text>
+                                    <text class="detail">Rating</text>
                                 </center>
                             </td>
                             <td>
                                 <center>
-                                <text class="detail">M</text>
+                                    <text class="detail">M</text>
                                 </center>
                             </td>
                             <td>
                                 <center>
-                                <text class="detail">T</text>
+                                    <text class="detail">T</text>
                                 </center>
                             </td>
                             <td>
                                 <center>
-                                <text class="detail">G</text>
+                                    <text class="detail">G</text>
                                 </center>
                             </td>
                             <td style="width: 100px">
                                 <center>
-                                <text class="detail">Release</text>
+                                    <text class="detail">Release</text>
                                 </center>
                             </td>
                             <td>
                                 <center>
-                                <text class="detail">Remove</text>
+                                    <text class="detail">Remove</text>
                                 </center>
                             </td>
                         </thead>
@@ -82,26 +80,57 @@
                             <tr>
                                 <td class="buttoncenter"><button class="btnInfoAdd" type="submit" name="cmdID" value="{{$data.ID}}">Info</button></td>
                                 <td>{{$data.Title}}</td>
-                                {{if $data.Rating}}<td><center>{{$data.Rating}}</center></td>{{else}}
-                                <td><center>N/A</center></td>{{end}}
+                                {{if $data.Rating}}
+                                <td>
+                                    <center>{{$data.Rating}}</center>
+                                </td>{{else}}
+                                <td>
+                                    <center>N/A</center>
+                                </td>{{end}}
                                 <td><input class="buttoncenter" type="checkbox" disabled {{if $data.Movie}}checked{{end}}></td>
                                 <td><input class="buttoncenter" type="checkbox" disabled {{if $data.TV}}checked{{end}}></td>
                                 <td><input class="buttoncenter" type="checkbox" disabled {{if $data.Game}}checked{{end}}></td>
                                 <td>
                                     {{if $data.Future}}
                                     <script type="application/javascript">
-                                    var clk = new Countdown({year: {{$data.Year}},
-	            					month: {{$data.Month}},
-		    	        			day: {{$data.Day}},
-			    		        	hour: {{$data.Hours}},
-				    		        minute: {{$data.Minutes}},
-					    	        timezone: {{$tz}},
-    						        rangeHi:"day",
-	    					        width:150,
- 		    				        height:30,
-				    		        style: "flip"
-    			       			    });
-                                    </script> {{else}} <center> {{$data.Release}} </center> {{end}}
+                                        var clk = new Countdown({
+                                            year: {
+                                                {
+                                                    $data.Year
+                                                }
+                                            },
+                                            month: {
+                                                {
+                                                    $data.Month
+                                                }
+                                            },
+                                            day: {
+                                                {
+                                                    $data.Day
+                                                }
+                                            },
+                                            hour: {
+                                                {
+                                                    $data.Hours
+                                                }
+                                            },
+                                            minute: {
+                                                {
+                                                    $data.Minutes
+                                                }
+                                            },
+                                            timezone: {
+                                                {
+                                                    $tz
+                                                }
+                                            },
+                                            rangeHi: "day",
+                                            width: 150,
+                                            height: 30,
+                                            style: "flip"
+                                        });
+                                    </script> {{else}}
+                                    <center> {{$data.Release}} </center> {{end}}
                                 </td>
                                 <td class="buttoncenter"><button class="btnRemove" type="submit" name="cmdRM" value="{{or $idx 4096}}">Remove</button></td>
                             </tr>
@@ -136,19 +165,19 @@
                     </div>
                 </div>
 
-                    <div id="gamemodal" class="modalDialog">
-                        <div>
-                            <a href="#close" title="Close" class="close">X</a>
-                            <img class="poster" src="{{.MovieTvGame.Image}}">
-                            <div class="movieDetailMsg">
-                                <h6>{{.MovieTvGame.Description}}</h6>
-                                <h6>Genres:{{range $idx, $g := .MovieTvGame.Genres}}&nbsp{{$g}}&nbsp{{end}}</h6>
-                                <h5>{{if .MovieTvGame.Youtube}}<a href={{.MovieTvGame.Youtube}} target="_blank">Trailer</a>{{else}}&nbsp{{end}}</h5>
-                                <h6>Release Date: {{.MovieTvGame.ReleaseDate}}
-                            </div>
-                       </div>
+                <div id="gamemodal" class="modalDialog">
+                    <div>
+                        <a href="#close" title="Close" class="close">X</a>
+                        <img class="poster" src="{{.MovieTvGame.Image}}">
+                        <div class="movieDetailMsg">
+                            <h6>{{.MovieTvGame.Description}}</h6>
+                            <h6>Genres:{{range $idx, $g := .MovieTvGame.Genres}}&nbsp{{$g}}&nbsp{{end}}</h6>
+                            <h5>{{if .MovieTvGame.Youtube}}<a href={{.MovieTvGame.Youtube}} target="_blank">Trailer</a>{{else}}&nbsp{{end}}</h5>
+                            <h6>Release Date: {{.MovieTvGame.ReleaseDate}}
+                        </div>
                     </div>
-            </div>
+                </div>
+    </div>
 
     </form>
     </center>

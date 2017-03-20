@@ -3,7 +3,7 @@ package csci152
 import (
 	"html/template"
 
-	"github.com/zmb3/spotify"
+	"github.com/ljmeyers80529/spot-go-gae"
 )
 
 var tpl *template.Template              // html web page processing / parsing object

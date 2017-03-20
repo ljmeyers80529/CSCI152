@@ -5,15 +5,25 @@ import (
 	"net/http"
 	// "strings"
 	// "strconv"
-	// "golang.org/x/net/context"
-	// "google.golang.org/appengine"
+
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 )
 
 // main (top) web page.
 func pageMain(res http.ResponseWriter, req *http.Request) {
-	// ctx := appengine.NewContext(req)
+	ctx := appengine.NewContext(req)
 	readCookie(res, req) // maintain user login / out state.apikey
-	initSpotify(res, req);
+	log.Infof(ctx, "Cookie = %v", webInformation.User)
+	if webInformation.User.LoggedIn {
+		log.Infof(ctx,"%s", "Loggedin")
+		// http.Redirect(res, req, "/home", http.StatusSeeOther)
+	} else {
+		log.Infof(ctx,"%s", "Needs to Loggedin")
+		// userLogin(res, req)
+	}
+
+	// initSpotify(res, req);
 	// popWatch(ctx)
 
 	// if req.Method == "POST" {

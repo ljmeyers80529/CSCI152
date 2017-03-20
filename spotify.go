@@ -3,7 +3,7 @@ package csci152
 import (
 	"net/http"
 
-	"github.com/zmb3/spotify"
+	"github.com/ljmeyers80529/spot-go-gae"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 )
