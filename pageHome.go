@@ -7,6 +7,7 @@ import (
 )
 
 func pageHome(res http.ResponseWriter, req *http.Request) {
+	readCookie(res, req)
 	if req.Method == "POST" {
 	}
 	tpl.ExecuteTemplate(res, "homepage.html", webInformation)

@@ -16,6 +16,9 @@ func readCookie(res http.ResponseWriter, req *http.Request) {
 	cookie := readCreateCookie(req)
 	http.SetCookie(res, cookie)                  // set cookie into browser.
 	userInformation = cookieInformationDecoding(cookie.Value) // decode and set user state into page variable.
+	if !userInformation.LoggedIn {
+		http.Redirect(res, req, "/login", http.StatusSeeOther)
+	}
 }
 
 // read an existing cookie or create a new one.
