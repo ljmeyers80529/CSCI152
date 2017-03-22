@@ -15,7 +15,6 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/memcache"
 )
 
@@ -66,7 +65,7 @@ func WriteNewUserInformation(res http.ResponseWriter, req *http.Request) (regist
 	spot := req.FormValue("spotifyaccount")
 	un := req.FormValue("newusername")
 
-	log.Infof(ctx,"V1 = %v\tV2 = %v\tV3 = %v\tV4 = %v", pass, conf, spot, un)
+	// log.Infof(ctx,"V1 = %v\tV2 = %v\tV3 = %v\tV4 = %v", pass, conf, spot, un)
 	names.Name = un
 
 	if pass == conf && spot != "" && un != "" {
@@ -76,11 +75,11 @@ func WriteNewUserInformation(res http.ResponseWriter, req *http.Request) (regist
 			UUID: uid,
 		}
 		userInformation = userInformationType{
-			UserID:   uid,
-			SpotifyAccount:     spot,
-			Password: EncryptPassword(pass),
-			Username: un,
-			LoggedIn: true,
+			UserID:         uid,
+			SpotifyAccount: spot,
+			Password:       EncryptPassword(pass),
+			Username:       un,
+			LoggedIn:       true,
 		}
 		if err = writeDataStore(ctx, nameDict, un, &names); err == nil {
 			err = WriteUserInformation(ctx, req)

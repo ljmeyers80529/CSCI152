@@ -3,9 +3,8 @@ package csci152
 import (
 	"html/template"
 	"net/http"
-
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/log"
+	// "google.golang.org/appengine"
+	// "google.golang.org/appengine/log"
 )
 
 func init() {
@@ -34,14 +33,4 @@ func configureResourceLocation(phyDir, hrefDir string) {
 	fs := http.FileServer(http.Dir(phyDir))
 	fs = http.StripPrefix("/"+hrefDir, fs)
 	http.Handle("/"+hrefDir+"/", fs)
-}
-
-func completeAuth(res http.ResponseWriter, req *http.Request) {
-	ctx := appengine.NewContext(req)
-	log.Infof(ctx, "Callback executed")
-	// _, err := auth.Token(spotStateValue, req)
-	// if err != nil {
-	// 	http.Error(res, "Couldn't get token", http.StatusForbidden)
-	// 	log.Errorf(ctx, "Error %v", err)
-	// }
 }
