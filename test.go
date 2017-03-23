@@ -1,5 +1,8 @@
 package main
 
+// Trying to run this code will result in an error due to a custom function on my
+// local repo of the Spotify API
+
 import (
 	"fmt"
 	"log"
