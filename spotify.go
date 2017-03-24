@@ -21,34 +21,38 @@ func completeAuth(res http.ResponseWriter, req *http.Request) {
 		spotClient = auth.NewClient(token)
 		webInformation.User.SpotLogged = true
 		updateCookie(res, req)
+		loadPlayLists(res, req)
 		http.Redirect(res, req, "/home", http.StatusSeeOther)
 	}
 }
 
 func initSpotify(res http.ResponseWriter, req *http.Request) {
-	// ctx := appengine.NewContext(req)
-	// log.Infof(ctx, "Check ==> %v", spotToken)
 	if !webInformation.User.SpotLogged {
 		auth = spotify.NewAuthenticator(retrieveURI, spotify.ScopeUserReadPrivate)
 		auth.SetAuthInfo(clientID, spotKey)
 		http.Redirect(res, req, auth.AuthURL(spotStateValue), http.StatusFound)
 	}
-	// sr, err := spotify.DefaultClient.Search("Rumors", spotify.SearchTypeAlbum)
+}
+
+func loadPlayLists(res http.ResponseWriter, req *http.Request) {
+	ctx := appengine.NewContext(req)
+	sr, err := spotClient.Search("Rumors", spotify.SearchTypeAlbum)
 	// baseURL = auth.AuthURL(spotStateValue)
 	// log.Infof(ctx, "Here ==> %v", "XXX")
 	// log.Infof(ctx, "Auth => %v\tCfg => %v", auth)
-	// log.Infof(ctx, "Error %v", err)
-	// log.Infof(ctx, "Search: ID=%v, URI=%v", sr.Albums.Albums[0].ID, sr.Albums.Albums[0].URI)
+	log.Infof(ctx, "Error %v", err)
+	log.Infof(ctx, "Search: ID=%v, URI=%v", sr.Albums.Albums[0].ID, sr.Albums.Albums[0].URI)
 
-	// albumID := sr.Albums.Albums[0].ID
+	albumID := sr.Albums.Albums[0].ID
 
-	// trks, err := spotify.GetAlbumTracks(albumID)
+	trks, err := spotify.GetAlbumTracks(albumID)
 
-	// if err == nil {
-	// 	for _, val := range trks.Tracks {
-	// 		log.Infof(ctx, "Tracks=%v", val.Name)
-	// 	}
-	// } else {
-	// 	log.Infof(ctx, "Error %v", err)
-	// }
+	if err == nil {
+		for _, val := range trks.Tracks {
+			log.Infof(ctx, "Tracks=%v", val.Name)
+		}
+	} else {
+		log.Infof(ctx, "Error %v", err)
+	}
+
 }
