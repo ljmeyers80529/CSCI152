@@ -13,20 +13,23 @@ func completeAuth(res http.ResponseWriter, req *http.Request) {
 	ctx := appengine.NewContext(req)
 	log.Infof(ctx, "Callback executed")
 
-	_, err := auth.Token(spotStateValue, req)
+	token, err := auth.Token(spotStateValue, req)
 	if err != nil {
-		// 	http.Error(res, "Couldn't get token", http.StatusForbidden)
-		// 	log.Errorf(ctx, "Error %v", err)
-		// } else {
-		// 	spotClient = auth.NewClient(spotToken)
+		http.Error(res, "Couldn't get token", http.StatusForbidden)
+		log.Errorf(ctx, "Error %v", err)
+	} else {
+		spotClient = auth.NewClient(token)
+		webInformation.User.SpotLogged = true
+		updateCookie(res, req)
+		http.Redirect(res, req, "/home", http.StatusSeeOther)
 	}
 }
 
 func initSpotify(res http.ResponseWriter, req *http.Request) {
 	// ctx := appengine.NewContext(req)
 	// log.Infof(ctx, "Check ==> %v", spotToken)
-	if spotToken == nil {
-		auth := spotify.NewAuthenticator(retrieveURI, spotify.ScopeUserReadPrivate)
+	if !webInformation.User.SpotLogged {
+		auth = spotify.NewAuthenticator(retrieveURI, spotify.ScopeUserReadPrivate)
 		auth.SetAuthInfo(clientID, spotKey)
 		http.Redirect(res, req, auth.AuthURL(spotStateValue), http.StatusFound)
 	}

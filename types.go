@@ -44,11 +44,12 @@ type dictionaryUserName struct { // name type to be read from dictionary of user
 
 // type to contain user information and preferences.
 type userInformationType struct {
-	UserID   	   string
+	UserID         string
 	SpotifyAccount string
-	Password 	   string
+	Password       string
 	Username       string
 	LoggedIn       bool
+	SpotLogged     bool
 	// Watched  []watch
 }
 
@@ -64,7 +65,7 @@ type userInformationType struct {
 
 // type definition to rendering information to the website.
 type webInformationType struct {
-	User        *userInformationType
+	User *userInformationType
 	// Counters    cdUpcomming
 	// Top, Pop, Game    topPopRated
 	// MovieTvGame movieTvGameInformation
