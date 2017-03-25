@@ -50,7 +50,6 @@ type userInformationType struct {
 	Username       string
 	LoggedIn       bool
 	SpotLogged     bool
-	// Watched  []watch
 }
 
 // // watched definition.

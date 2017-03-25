@@ -14,7 +14,7 @@ func pageLogin(res http.ResponseWriter, req *http.Request) {
 			http.Redirect(res, req, "/register", http.StatusSeeOther)
 		case "Login":
 			if checkUserLogin(res, req) {
-				http.Redirect(res, req, "/", http.StatusSeeOther)
+				http.Redirect(res, req, "/home", http.StatusSeeOther)
 			}
 		}
 	}

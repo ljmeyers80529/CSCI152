@@ -3,8 +3,6 @@ package csci152
 import (
 	"html/template"
 	"net/http"
-	// "google.golang.org/appengine"
-	// "google.golang.org/appengine/log"
 )
 
 func init() {
@@ -21,7 +19,7 @@ func init() {
 	http.HandleFunc("/home", pageHome)
 	http.HandleFunc("/username/check", pageRegisterUsernameCheck) // verify username is unique.
 	http.HandleFunc("/about", pageAbout)                          // about web page.
-	http.HandleFunc("/callback", completeAuth)
+	http.HandleFunc("/callback", completeAuthentication)
 
 	tpl = template.Must(template.ParseGlob("html/*.html"))
 }

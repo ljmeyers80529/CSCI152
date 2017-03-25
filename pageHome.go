@@ -13,6 +13,7 @@ func pageHome(res http.ResponseWriter, req *http.Request) {
 	if req.Method == "POST" {
 	}
 	initSpotify(res, req)
-	log.Infof(ctx, "Client code => %v", spotClient)
+	log.Infof(ctx, "Client code in home => %v", spotClient)
+	// loadPlayLists(res, req)
 	tpl.ExecuteTemplate(res, "homepage.html", webInformation)
 }

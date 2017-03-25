@@ -9,7 +9,7 @@ import (
 	"github.com/ljmeyers80529/spot-go-gae"
 )
 
-func completeAuth(res http.ResponseWriter, req *http.Request) {
+func completeAuthentication(res http.ResponseWriter, req *http.Request) {
 	ctx := appengine.NewContext(req)
 	log.Infof(ctx, "Callback executed")
 
@@ -21,7 +21,6 @@ func completeAuth(res http.ResponseWriter, req *http.Request) {
 		spotClient = auth.NewClient(token)
 		webInformation.User.SpotLogged = true
 		updateCookie(res, req)
-		loadPlayLists(res, req)
 		http.Redirect(res, req, "/home", http.StatusSeeOther)
 	}
 }
@@ -34,25 +33,47 @@ func initSpotify(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func loadPlayLists(res http.ResponseWriter, req *http.Request) {
-	ctx := appengine.NewContext(req)
-	sr, err := spotClient.Search("Rumors", spotify.SearchTypeAlbum)
-	// baseURL = auth.AuthURL(spotStateValue)
-	// log.Infof(ctx, "Here ==> %v", "XXX")
-	// log.Infof(ctx, "Auth => %v\tCfg => %v", auth)
-	log.Infof(ctx, "Error %v", err)
-	log.Infof(ctx, "Search: ID=%v, URI=%v", sr.Albums.Albums[0].ID, sr.Albums.Albums[0].URI)
-
-	albumID := sr.Albums.Albums[0].ID
-
-	trks, err := spotify.GetAlbumTracks(albumID)
-
-	if err == nil {
-		for _, val := range trks.Tracks {
-			log.Infof(ctx, "Tracks=%v", val.Name)
-		}
-	} else {
-		log.Infof(ctx, "Error %v", err)
-	}
-
+// check if client object has been defined; returns true if Ok..
+func clientOK() bool {
+	return (spotClient == spotify.Client{})
 }
+
+// func loadPlayLists(res http.ResponseWriter, req *http.Request) {
+// 	ctx := appengine.NewContext(req)
+
+// 	if (spotClient == spotify.Client{}) {
+// 		log.Infof(ctx, "Client Empty")
+// 	} else {
+// 		log.Infof(ctx, "Client not empty")
+// 		sr, err := spotClient.CurrentUsersPlaylists()
+// 		log.Infof(ctx, "Playlist ==> %v", sr)
+// 		if err == nil {
+// 			log.Infof(ctx, "Playlist ==> %v", sr)
+// 			// for _, val := range trks.Tracks {
+// 			// 	log.Infof(ctx, "Tracks=%v", val.Name)
+// 		} else {
+// 			log.Infof(ctx, "Error %v", err)
+// 		}
+
+// 	}
+// 	// log.Infof(ctx, "Playlist ==> %v", sr)
+
+// 	// sr, err := spotClient.CurrentUsersPlaylists()
+
+// 	// sr, err := spotClient.Search("Rumors", spotify.SearchTypeAlbum)
+// 	// log.Infof(ctx, "Error %v", err)
+// 	// log.Infof(ctx, "Search: ID=%v, URI=%v", sr.Albums.Albums[0].ID, sr.Albums.Albums[0].URI)
+
+// 	// albumID := sr.Albums.Albums[0].ID
+
+// 	// trks, err := spotify.GetAlbumTracks(albumID)
+
+// 	// if err == nil {
+// 	// 	log.Infof(ctx, "Playlist ==> %v", sr)
+// 	// 	// for _, val := range trks.Tracks {
+// 	// 	// 	log.Infof(ctx, "Tracks=%v", val.Name)
+// 	// } else {
+// 	// 	log.Infof(ctx, "Error %v", err)
+// 	// }
+
+// }

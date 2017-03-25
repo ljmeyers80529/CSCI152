@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	// "math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -65,7 +64,6 @@ func WriteNewUserInformation(res http.ResponseWriter, req *http.Request) (regist
 	spot := req.FormValue("spotifyaccount")
 	un := req.FormValue("newusername")
 
-	// log.Infof(ctx,"V1 = %v\tV2 = %v\tV3 = %v\tV4 = %v", pass, conf, spot, un)
 	names.Name = un
 
 	if pass == conf && spot != "" && un != "" {
