@@ -1,2 +1,2 @@
 # CSCI152
-Sharing friends tast of music using Spotify.
+Sharing friends taste of music using Spotify.
