@@ -19,6 +19,8 @@ func init() {
 	http.HandleFunc("/home", pageHome)
 	http.HandleFunc("/username/check", pageRegisterUsernameCheck) // verify username is unique.
 	http.HandleFunc("/about", pageAbout)                          // about web page.
+	http.HandleFunc("/playlist", loadPlayLists)
+	//
 	http.HandleFunc("/callback", completeAuthentication)
 
 	tpl = template.Must(template.ParseGlob("html/*.html"))
