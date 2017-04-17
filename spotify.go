@@ -57,17 +57,22 @@ func loadPlayLists(res http.ResponseWriter, req *http.Request) {
 		// log.Infof(ctx, "Endpoint: %v", user.Endpoint)
 		// log.Infof(ctx, "Followers: %v", user.Followers.Count)
 		sr, err := spotClient.CurrentUsersPlaylists()
+		// sr, err := spotClient.GetPlaylistsForUser(user.ID)
 		log.Infof(ctx, "Playlist (full) ==> %v", sr)
 		if err == nil {
 			// trks := sr.Playlists[0].Name
 			// log.Infof(ctx, "\nPlaylist (track) ==> %v\n", sr.Playlists[0].ID)
 			for _, val := range sr.Playlists {
-				// trk, _ := spotClient.GetTrack(val.ID)
-				log.Infof(ctx, "\nPlaylist (track) ==> %v\n", val.ID)
-				trk, err := spotClient.GetTrack(val.ID)
+				trk, err := spotClient.GetPlaylistTracks(user.ID, val.ID)
 				if err == nil {
-					log.Infof(ctx, "\nPlaylist (track) ==> %v\n", trk)
-				} else {
+					for _, tVal := range trk.Tracks {
+						log.Infof(ctx, "\nPlaylist (track) ==> %v\n", tVal.Track.Name)
+					}
+				}
+				// trk, _ := spotClient.GetTrack(val.ID)
+				// log.Infof(ctx, "\nPlaylist (track) ==> %v\n", val.ID)
+				// trk, err := spotClient.GetTrack(val.ID)
+				if err != nil {
 					log.Infof(ctx, "Error")
 				}
 			}
