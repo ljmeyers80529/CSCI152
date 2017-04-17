@@ -2,7 +2,7 @@
 /*changes to body done here, default stuff,*/
 body{
     margin:0;
-    background: #222; /*body background color*/
+   background: #222; /*body background color*/
     font-family: sans-serif;
     color: white;
     font-weight: 400; /*changes thickness of font*/
@@ -34,7 +34,9 @@ header{
 /*messes with list in general*/
 .nav ul{
     margin: 0; /*no space around it, important for positioning of list */
+    margin-right: 40px; /*shifting whole list a tad bit to the left*/
     list-style: none; /*take off default list bullet points/underlining*/
+
 }
 
 /*messes with whats inside of list*/
@@ -144,3 +146,39 @@ header{
 .dropdown:hover .dropdown-content {
     display: block;
 }
+
+
+#atf {
+    height: 100vh;
+   display: flex;
+    flex-direction: row;
+}
+
+#btf{
+    display: flex;
+    flex-direction: row;
+}
+
+#container1, #container3{
+
+    float: left;
+    width: 33.3%;
+    padding: 8px;
+}
+
+#container2, #container4{
+
+
+    float: right;
+    width: 33.3%;
+    padding: 8px;
+
+}
+
+/*
+#container2{
+    float: right;
+    width: 33.3%;
+    padding: 8px;
+}
+*/
