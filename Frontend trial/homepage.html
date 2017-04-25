@@ -17,8 +17,6 @@ login{
 </style>
 
 <!-- For all documents decide between using 'id' and 'class'-->
-<body>
-
 <header>
     <!-- Eventually turn this into a header file-->
     <a href="homepage.html"><img src="img/taste.jpeg" id="navlogo" ></a>
@@ -26,6 +24,11 @@ login{
         <ul>
             <li><a href="homepage.html">HOME</a></li>
             <li><a href="about.html">ABOUT</a></li>
+            {{if !.User.LoggedIn}}
+            <li><p><input type="text" name="username" placeholder="Username" autofocus>
+                   <input type="password" name="password" value="" placeholder="Password">
+                   <class="submit"><input type="submit" name="cmdbutton" value="Login"></p></li>
+            {{else}}
             <li class="dropdown">
                 <a href="#drop">SETTINGS</a>
                 <div class = "dropdown-content">
@@ -34,48 +37,38 @@ login{
                     <a href="#">Link3</a>
                 </div>
             </li>
+            {{end}}
         </ul>
     </div>
 </header>
 
+<body>
+<div id = "atf">
+{{if !.User.LoggedIn}}
 <content>
-<div class="homepage">
-    <h1>Taste Taste</h1>
-    <img src="img/taste.jpeg">
-    <p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
-    <p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-    <p>TESTING NAV BAR FIXED POSITION</p>
-</div>
+<style>
+    body { 
+        background: url("img/HeadphoneHomepage1.jpg") no-repeat center center fixed;
+        background-size: cover;
+    }
+</style>
+    <div class="homepage">
+        <h1>Taste Taste</h1>
+        <img src="img/taste.jpeg">
+        <p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
+        <p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
+        <p>TESTING NAV BAR FIXED POSITION</p>
+        <p>TESTING NAV BAR FIXED POSITION</p>
+        <p>TESTING NAV BAR FIXED POSITION</p>
+        <p>TESTING NAV BAR FIXED POSITION</p>
+        <p>TESTING NAV BAR FIXED POSITION</p>
+        <p>TESTING NAV BAR FIXED POSITION</p>
+    </div>
 </content>
 
 <login>
     <form method="post">
-            <center>
+        <center>
             <section class="container">
 
                 <div id="register">
@@ -98,13 +91,59 @@ login{
         </center>
     </form>
 </login>
-
-<!--
-<div id="endnav">
-    <ul>
-        <!-- Maybe add our info here or something
-        <li><a href="#backtotop">BACK TO TOP</a></li>
-    </ul>
 </div>
--->
+
+<div class="btf1">
+    <div id="container1">
+        <h1>Taste Taste</h1>
+        <img src="img/taste.jpeg">
+        <p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
+        <p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
+        <p>TESTING NAV BAR FIXED POSITION</p>
+        <p>TESTING NAV BAR FIXED POSITION</p>
+        <p>TESTING NAV BAR FIXED POSITION</p>
+    </div>
+
+    <div id="container2">
+        <h1>Taste Taste</h1>
+        <img src="img/taste.jpeg">
+        <p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
+        <p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
+        <p>TESTING NAV BAR FIXED POSITION</p>
+        <p>TESTING NAV BAR FIXED POSITION</p>
+        <p>TESTING NAV BAR FIXED POSITION</p>
+    </div>
+    </div>
+
+<div id = "btf2">
+
+    <div id="container3">
+        <h1>Taste Taste</h1>
+        <img src="img/taste.jpeg">
+        <p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
+        <p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
+        <p>TESTING NAV BAR FIXED POSITION</p>
+        <p>TESTING NAV BAR FIXED POSITION</p>
+        <p>TESTING NAV BAR FIXED POSITION</p>
+    </div>
+
+    <div id="container4">
+        <h1>Taste Taste</h1>
+        <img src="img/taste.jpeg">
+        <p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
+        <p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
+        <p>TESTING NAV BAR FIXED POSITION</p>
+        <p>TESTING NAV BAR FIXED POSITION</p>
+        <p>TESTING NAV BAR FIXED POSITION</p>
+    </div>
+
+
+</div>
 </body>
+{{else}}
+<body>
+<div>
+    <iframe src="https://embed.spotify.com/?uri=spotify:user:spotify:playlist:3rgsDhGHZxZ9sB9DQWQfuf" width="720" height="640" frameborder="0" allowtransparency="true"></iframe>
+</div>
+</body>
+{{end}}
