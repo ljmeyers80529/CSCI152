@@ -18,8 +18,7 @@
 // )
 
 // var (
-// 	auth = spotify.NewAuthenticator(redirectURI, "user-top-read")
-// 	//auth  = spotify.NewAuthenticator(redirectURI, "user-read-recently-played")
+// 	auth  = spotify.NewAuthenticator(redirectURI, "user-top-read")
 // 	ch    = make(chan *spotify.Client)
 // 	state = "abc123"
 // )
@@ -48,35 +47,115 @@
 // 	}
 // 	fmt.Println("You are logged in as:", user.ID)
 
-// 	err = generateTrainingData(client, "Classical", "Pop")
+// 	var genres []string
+// 	genres = append(genres, "classical")
+// 	genres = append(genres, "pop")
+
+// 	data, err := generateTrainingData(client, genres)
 // 	if err != nil {
 // 		fmt.Println(err)
 // 		return
 // 	}
 
-// }
+// 	dataElementCount := len(data[0])
+// 	genreCount := 2
+// 	hiddenCount := dataElementCount + genreCount + 10
 
-// func generateTrainingData(client *spotify.Client, genre1, genre2 string) error {
-// 	seeds := getSeeds(genre1, genre2)
+// 	network := gonn.NewNetwork(dataElementCount, hiddenCount, genreCount, false, 0.01, 0.001) // This is working sort of
 
-// 	recs, err := getRecommendations(client, seeds...)
-// 	if err != nil {
-// 		return err
+// 	targets := make([][]float64, 40)
+// 	for i := 0; i < 20; i++ {
+// 		targets[i] = []float64{1.0, 0.0}
+// 	}
+// 	for j := 20; j < 40; j++ {
+// 		targets[j] = []float64{0.0, 1.0}
+// 	}
+// 	// targets := make([][]float64, 40)
+
+// 	// for i := 0; i < 20; i++ {
+// 	// 	targets[i] = []float64{0.0}
+// 	// }
+
+// 	// for j := 20; j < 40; j++ {
+// 	// 	targets[j] = []float64{1.0}
+// 	// }
+
+// 	fmt.Println("DATA")
+// 	for index, val := range data {
+// 		fmt.Println("Index:", index, val)
+// 	}
+// 	fmt.Println("\nTARGETS")
+// 	for index, val := range targets {
+// 		fmt.Println("Index:", index, val)
 // 	}
 
-// 	ids := getIDs(recs...)
+// 	network.Train(data, targets, 1000)
 
-// 	analyses, err := getAnalyses(client, ids...)
-// 	if err != nil {
-// 		return err
+// 	for _, val := range data {
+// 		fmt.Println(network.Forward(val))
 // 	}
-
-// 	// Make slice of floats according to analyse here
-
-// 	return nil
 // }
 
-// func getAnalyses(client *spotify.Client, ids ...spotify.ID) (analyses []*spotify.AudioAnalysis, err error) {
+// func generateTrainingData(client *spotify.Client, genres []string) (data [][]float64, err error) {
+// 	seeds := formatSeeds(genres)
+
+// 	recs, err := generateRecommendations(client, seeds)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	ids := getIDs(recs)
+
+// 	analyses, err := getAnalyses(client, ids)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	features, err := getFeatures(client, ids)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	data = formatData(analyses, features)
+// 	return data, nil
+// }
+
+// func formatData(analyses []*spotify.AudioAnalysis, features [][]float64) (data [][]float64) {
+// 	for index, val := range analyses {
+// 		var datum []float64
+// 		datum = append(datum, val.TrackInfo.Duration)
+// 		datum = append(datum, val.TrackInfo.Tempo)
+// 		datum = append(datum, float64(val.TrackInfo.TimeSignature))
+// 		datum = append(datum, float64(val.TrackInfo.Key))
+// 		datum = append(datum, val.TrackInfo.Loudness)
+// 		datum = append(datum, float64(val.TrackInfo.Mode))
+
+// 		datum = append(datum, features[index]...) // Concatenate datum and features
+// 		data = append(data, datum)
+// 	}
+// 	return data
+// }
+
+// func getFeatures(client *spotify.Client, ids []spotify.ID) (features [][]float64, err error) {
+// 	tracks, err := client.GetAudioFeatures(ids...)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	for _, val := range tracks {
+// 		var track []float64
+// 		track = append(track, float64(val.Acousticness))
+// 		track = append(track, float64(val.Danceability))
+// 		track = append(track, float64(val.Energy))
+// 		track = append(track, float64(val.Instrumentalness))
+// 		track = append(track, float64(val.Liveness))
+// 		track = append(track, float64(val.Speechiness))
+// 		track = append(track, float64(val.Valence))
+// 		features = append(features, track)
+// 	}
+// 	return features, nil
+// }
+
+// func getAnalyses(client *spotify.Client, ids []spotify.ID) (analyses []*spotify.AudioAnalysis, err error) {
 // 	for _, val := range ids {
 // 		analysis, err := client.GetAudioAnalysis(val)
 // 		if err != nil {
@@ -84,10 +163,11 @@
 // 		}
 // 		analyses = append(analyses, analysis)
 // 	}
+
 // 	return analyses, nil
 // }
 
-// func getIDs(recs ...*spotify.Recommendations) (ids []spotify.ID) {
+// func getIDs(recs []*spotify.Recommendations) (ids []spotify.ID) {
 // 	for _, val := range recs {
 // 		tracks := val.Tracks
 // 		for _, track := range tracks {
@@ -97,7 +177,7 @@
 // 	return ids
 // }
 
-// func getRecommendations(client *spotify.Client, seeds ...spotify.Seeds) (recs []*spotify.Recommendations, err error) {
+// func generateRecommendations(client *spotify.Client, seeds []spotify.Seeds) (recs []*spotify.Recommendations, err error) {
 // 	attr := spotify.NewTrackAttributes()
 // 	opts := spotify.Options{}
 
@@ -112,7 +192,7 @@
 // 	return recs, nil
 // }
 
-// func getSeeds(genres ...string) (seeds []spotify.Seeds) {
+// func formatSeeds(genres []string) (seeds []spotify.Seeds) {
 // 	for _, val := range genres {
 // 		var values []string
 // 		values = append(values, val)
