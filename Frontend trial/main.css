@@ -1,4 +1,3 @@
-
 /*changes to body done here, default stuff,*/
 body{
     margin:0;
@@ -14,7 +13,7 @@ body{
 header{
     width: 100%; /*take 100% width of page */
     position:fixed; /*keep header in place as you scroll*/
-    background: #55d6aa; /*change color of header*/
+    background: #1ED760; /*change color of header*/
     top:0px; /*star at 0 position from top */
     opacity: .6; /*trasperency*/
 }
@@ -53,7 +52,7 @@ header{
     content: '';
     display: block;
     height: 5px;
-    background-color: #444;
+    background-color: #FFFFFF;
 
     position: absolute;
     top: 35px;
@@ -68,9 +67,9 @@ header{
 
 
 .nav a{  /*messes with text on nav*/
-    color: #444;
+    color: #FFFFFF;
     text-decoration: none;
-    font-family: "Old English Text MT";
+    font-family: "Eras Bold ITC";
 }
 
 /*color when hovering over text on nav*/
@@ -182,3 +181,4 @@ header{
     padding: 8px;
 }
 */
+\ No newline at end of file

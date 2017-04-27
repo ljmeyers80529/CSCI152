@@ -7,19 +7,18 @@
 
 <style>
 content{
-    float: left;
-    width: 80%;
+	text-align:right;
+    float: right;
+    width: 75%;
 }
 login{
-    float: left;
-    width: 20%;
+	display: inline-block;
+    width: 25%;
 }
 </style>
 
-<!-- For all documents decide between using 'id' and 'class'-->
 <header>
-    <!-- Eventually turn this into a header file-->
-    <a href="homepage.html"><img src="img/taste.jpeg" id="navlogo" ></a>
+    <a href="homepage.html"><img src="img/test1nobg.png" id="navlogo" ></a>
     <div class="nav">
         <ul>
             <li><a href="homepage.html">HOME</a></li>
@@ -43,107 +42,102 @@ login{
 </header>
 
 <body>
-<div id = "atf">
-{{if !.User.LoggedIn}}
-<content>
-<style>
-    body { 
-        background: url("img/HeadphoneHomepage1.jpg") no-repeat center center fixed;
-        background-size: cover;
-    }
-</style>
-    <div class="homepage">
-        <h1>Taste Taste</h1>
-        <img src="img/taste.jpeg">
-        <p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
-        <p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
-        <p>TESTING NAV BAR FIXED POSITION</p>
-        <p>TESTING NAV BAR FIXED POSITION</p>
-        <p>TESTING NAV BAR FIXED POSITION</p>
-        <p>TESTING NAV BAR FIXED POSITION</p>
-        <p>TESTING NAV BAR FIXED POSITION</p>
-        <p>TESTING NAV BAR FIXED POSITION</p>
-    </div>
-</content>
+	<div id = "atf">
+	{{if !.User.LoggedIn}}
+		<content>
+		
+			<style>
+				body { 
+					background: url("img/HeadphoneHomepage1.jpg") no-repeat center center fixed;
+					background-size: cover;
+				}
+			</style>
+			
+			<div class="homepage">
+				<img src="img/test1.jpg">
+				<p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
+				<p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
+				<br></br>
+				<p>After creation you can view your playlist here or port it to your Spotify account!</p>
+				<p>As well as this...</p>
+				<p>As well as this...</p>
+			</div>
+		</content>
 
-<login>
-    <form method="post">
-        <center>
-            <section class="container">
+		<login>
+			<form method="post">
+					<section class="container">
 
-                <div id="register">
-                    <h1><text class="detail">Sign Up!</text></h1>
-                    <p><input type="text" id="enterUsername" placeholder="Username" name="newusername" autofocus/></p>
-                    <p><input type="Password" id="userPassword" placeholder="Password" name="newpassword" /></p>
-                    <p><input type="Password" id="userPassword" class="form-control input-sm chat-input" placeholder="Confirm Password" name="confirm" /></p>
-                    <!-- Convert this to a function that links spotify account-->
-                    <p><input type="text" id="Username" placeholder="Spotify Account" name="spotifyaccount"/></p>
+						<div id="register">
+							<br></br><br></br><br></br><br></br>
+							<h1><text class="detail">Sign Up!</text></h1>
+							<p><input type="text" id="enterUsername" placeholder="Username" name="newusername" autofocus/></p>
+							<p><input type="Password" id="userPassword" placeholder="Password" name="newpassword" /></p>
+							<p><input type="Password" id="userPassword" class="form-control input-sm chat-input" placeholder="Confirm Password" name="confirm" /></p>
 
-                    <div class="loginbtn">
-                        <p class="submit"><input type="submit" name="cmdbutton" value="OK"></p>
-                        <p class="submit"><input type="submit" name="cmdbutton" value="Cancel"></p>
-                    </div>
+							<div class="loginbtn">
+								<p class="submit"><input type="submit" name="cmdbutton" value="OK"></p>
+								<p class="submit"><input type="submit" name="cmdbutton" value="Cancel"></p>
+							</div>
                     
-                    <h2 id="usedmsg" style="position: relative; top: 12px; color: red;"></h2>
-                </div>
+							<h2 id="usedmsg" style="position: relative; top: 12px; color: red;"></h2>
+						</div>
 
-            </section>
-        </center>
-    </form>
-</login>
-</div>
+					</section>
+			</form>
+		</login>
+	</div>
 
-<div class="btf1">
-    <div id="container1">
-        <h1>Taste Taste</h1>
-        <img src="img/taste.jpeg">
-        <p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
-        <p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
-        <p>TESTING NAV BAR FIXED POSITION</p>
-        <p>TESTING NAV BAR FIXED POSITION</p>
-        <p>TESTING NAV BAR FIXED POSITION</p>
+	<div class="btf1">
+		<div id="container1">
+			<h1>Taste Taste</h1>
+			<img src="img/taste.jpeg">
+			<p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
+			<p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
+			<p>TESTING NAV BAR FIXED POSITION</p>
+			<p>TESTING NAV BAR FIXED POSITION</p>
+			<p>TESTING NAV BAR FIXED POSITION</p>
+		</div>
+
+		<div id="container2">
+			<h1>Taste Taste</h1>
+			<img src="img/taste.jpeg">
+			<p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
+			<p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
+			<p>TESTING NAV BAR FIXED POSITION</p>
+			<p>TESTING NAV BAR FIXED POSITION</p>
+			<p>TESTING NAV BAR FIXED POSITION</p>
+		</div>
     </div>
 
-    <div id="container2">
-        <h1>Taste Taste</h1>
-        <img src="img/taste.jpeg">
-        <p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
-        <p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
-        <p>TESTING NAV BAR FIXED POSITION</p>
-        <p>TESTING NAV BAR FIXED POSITION</p>
-        <p>TESTING NAV BAR FIXED POSITION</p>
-    </div>
-    </div>
+	<div id = "btf2">
 
-<div id = "btf2">
+		<div id="container3">
+			<h1>Taste Taste</h1>
+			<img src="img/taste.jpeg">
+			<p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
+			<p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
+			<p>TESTING NAV BAR FIXED POSITION</p>
+			<p>TESTING NAV BAR FIXED POSITION</p>
+			<p>TESTING NAV BAR FIXED POSITION</p>
+		</div>
 
-    <div id="container3">
-        <h1>Taste Taste</h1>
-        <img src="img/taste.jpeg">
-        <p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
-        <p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
-        <p>TESTING NAV BAR FIXED POSITION</p>
-        <p>TESTING NAV BAR FIXED POSITION</p>
-        <p>TESTING NAV BAR FIXED POSITION</p>
-    </div>
+		<div id="container4">
+			<h1>Taste Taste</h1>
+			<img src="img/taste.jpeg">
+			<p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
+			<p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
+			<p>TESTING NAV BAR FIXED POSITION</p>
+			<p>TESTING NAV BAR FIXED POSITION</p>
+			<p>TESTING NAV BAR FIXED POSITION</p>
+		</div>
 
-    <div id="container4">
-        <h1>Taste Taste</h1>
-        <img src="img/taste.jpeg">
-        <p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
-        <p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
-        <p>TESTING NAV BAR FIXED POSITION</p>
-        <p>TESTING NAV BAR FIXED POSITION</p>
-        <p>TESTING NAV BAR FIXED POSITION</p>
-    </div>
-
-
-</div>
+	</div>
 </body>
 {{else}}
 <body>
-<div>
-    <iframe src="https://embed.spotify.com/?uri=spotify:user:spotify:playlist:3rgsDhGHZxZ9sB9DQWQfuf" width="720" height="640" frameborder="0" allowtransparency="true"></iframe>
-</div>
+	<div>
+		<iframe src="https://embed.spotify.com/?uri=spotify:user:spotify:playlist:3rgsDhGHZxZ9sB9DQWQfuf" width="720" height="640" frameborder="0" allowtransparency="true"></iframe>
+	</div>
 </body>
 {{end}}
