@@ -149,8 +149,11 @@ header{
 
 #atf {
     height: 100vh;
-   display: flex;
+    display: flex;
     flex-direction: row;
+    background: url("img/HeadphoneHomepage1.jpg") no-repeat center center;
+	background-size: cover;
+    
 }
 
 #btf{
