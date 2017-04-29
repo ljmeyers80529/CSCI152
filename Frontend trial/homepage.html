@@ -33,9 +33,9 @@ login{
             <li class="dropdown">
                 <a href="#drop">SETTINGS</a>
                 <div class = "dropdown-content">
-                    <a href="#">Link1</a>
-                    <a href="#">Link2</a>
-                    <a href="#">Link3</a>
+                    <a href="#">Preferances</a>
+                    <a href="#">Sharing</a>
+                    <a href="#">Signout</a>
                 </div>
             </li>
             {{end}}
@@ -82,16 +82,25 @@ login{
 		</login>
 	</div>
 
+    <div id="grad1">
+
+    </div>
+
 	<div class="btf1">
 		<div id="container1">
 			<h1>Taste Taste</h1>
-			<img src="img/test1nobg.png">
+			<img src="img/test1nobg.jpg">
 			<p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
 			<p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
 			<p>TESTING NAV BAR FIXED POSITION</p>
 			<p>TESTING NAV BAR FIXED POSITION</p>
 			<p>TESTING NAV BAR FIXED POSITION</p>
 		</div>
+
+        <div id = "player">
+            <h1>Sample Playlist</h1>
+            <iframe src="https://embed.spotify.com/?uri=spotify:user:spotify:playlist:3rgsDhGHZxZ9sB9DQWQfuf" width="520" height="440" frameborder="0"></iframe>
+        </div>
 
 		<div id="container2">
 			<h1>Taste Taste</h1>
@@ -108,7 +117,7 @@ login{
 
 		<div id="container3">
 			<h1>Taste Taste</h1>
-			<img src="img/taste.jpeg">
+			<img src="img/taste.jpeg" width = "300" height="300">
 			<p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
 			<p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
 			<p>TESTING NAV BAR FIXED POSITION</p>
@@ -118,7 +127,7 @@ login{
 
 		<div id="container4">
 			<h1>Taste Taste</h1>
-			<img src="img/taste.jpeg">
+			<img src="img/taste.jpeg" width = "300" height = "300">
 			<p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
 			<p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
 			<p>TESTING NAV BAR FIXED POSITION</p>
@@ -127,11 +136,30 @@ login{
 		</div>
 
 	</div>
+        <!--<div id = "player">
+            <h1>Sample Playlist</h1>
+            <iframe src="https://embed.spotify.com/?uri=spotify:user:spotify:playlist:3rgsDhGHZxZ9sB9DQWQfuf" width="620" height="540" frameborder="0"></iframe>
+        </div>-->
+
+    <div id="BottomPart">
+
+    </div>
+
 </body>
+
+
+
+<!-----------------------THIS SECTION WILL BE FOR THE STUFF NOT SHOWN IF USER IS LOGGED IN--------------------------------->
+
+<!--
 {{else}}
 <body>
-	<div>
-		<iframe src="https://embed.spotify.com/?uri=spotify:user:spotify:playlist:3rgsDhGHZxZ9sB9DQWQfuf" width="720" height="640" frameborder="0" allowtransparency="true"></iframe>
-	</div>
+	<div class = "bottom">
+        <div id = "player">
+<iframe src="https://embed.spotify.com/?uri=spotify:user:spotify:playlist:3rgsDhGHZxZ9sB9DQWQfuf" width="720" height="640" frameborder="0"></iframe>
+
+</div>
+</div>
 </body>
 {{end}}
+-->
