@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
+	"strings"
 
 	"github.com/fxsjy/gonn/gonn"
 	"github.com/zmb3/spotify"
@@ -19,10 +19,11 @@ const (
 	testSecret      = "a3790222803a4f8fbdd5cdd5a2ce64d9"
 	root            = "https://api.spotify.com/v1/"
 	authroot        = "https://accounts.spotify.com/authorize"
-	dataPerGenreNum = 500
+	dataPerGenreNum = 300 // 500 breaks something; using 300 for standard
 	iterationNum    = 1000
-	confidenceNum   = 0.75
-	extraNodesNum   = 20
+	confidenceNum   = 0.95
+	extraNodesNum   = 5
+	testDataSizeNum = 10
 )
 
 var (
@@ -32,60 +33,45 @@ var (
 )
 
 // Command line arguments are as follows:
-// 1 - Generate training data using endpoint and save to local file
-// 2 - Generate training data using existing local file
+// -network : Explicitly use network to generate genre data
+// -test : Run a neural network test using small test cases generated using network
+// -write : Write the analysis data to disk
+// Default: Use local training data from files on disk, don't run test, don't write new files
+
 func main() {
 	// Get command-line arguments
-	choice, err := strconv.Atoi(os.Args[1])
-	if err != nil {
-		log.Println(err)
-		return
-	}
+	argList := []string{"-network", "-test", "-write"}
+	args := initializeArgMap(argList)
+	resolveCommandArgs(args)
 
 	// Initialize variables assigned by constants
 	confidence := confidenceNum
 	dataPerGenre := dataPerGenreNum
 	extraNodes := extraNodesNum
 	iterations := iterationNum
+	testDataSize := testDataSizeNum
 
 	// Initialize genre variables
-	var genres []string
-	genres = append(genres, "classical")
-	genres = append(genres, "pop")
+	genres := []string{"classical", "pop"}
 
-	// Initialize trainingData
+	// Initialize trainingData and error
 	var trainingData [][]float64
+	var err error
+	var client *spotify.Client
 
 	// Set up local server
-	if choice == 1 {
-		// Set SPOTIFY_ID and SPOTIFY_SECRET
-		auth.SetAuthInfo(testID, testSecret)
-
-		// Start HTTP Server
-		http.HandleFunc("/callback", completeAuth)
-		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			log.Println("Got request for:", r.URL.String())
-		})
-		go http.ListenAndServe(":8080", nil)
-
-		url := auth.AuthURL(state)
-		fmt.Println("Please log in to Spotify by visiting the following page in your browser:", url)
-
-		// Block until authorization complete
-		client := <-ch
-
-		// Assign current user according to client
-		user, err := client.CurrentUser()
+	if args["-network"] {
+		client, err = initializeServer()
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			return
 		}
-		fmt.Println("You are logged in as:", user.ID)
 
 		// Generate training data from endpoints
-		fmt.Println("Generating genre data...")
-		trainingData, err = generateGenreData(client, genres, dataPerGenre)
+		log.Println("Generating genre data...")
+		trainingData, err = generateGenreData(client, genres, dataPerGenre, args["-write"])
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return
 		}
 	} else {
@@ -100,7 +86,7 @@ func main() {
 
 	// Network operations
 	dataElementCount := len(trainingData[0])
-	genreCount := 2
+	genreCount := len(genres)
 	hiddenCount := dataElementCount + genreCount + extraNodes
 
 	//network := gonn.DefaultNetwork(dataElementCount, hiddenCount, genreCount, false)
@@ -111,21 +97,41 @@ func main() {
 	targetData := generateTargetData(genreCount, dataPerGenre)
 
 	// Debugging code
-	log.Println("TRAINING DATA")
-	for index, val := range trainingData {
-		log.Println("Index:", index, val)
-	}
-	log.Println("\nTARGET DATA")
-	for index, val := range targetData {
-		log.Println("Index:", index, val)
-	}
+	// log.Println("TRAINING DATA")
+	// for index, val := range trainingData {
+	// 	log.Println("Index:", index, val)
+	// }
+	// log.Println("\nTARGET DATA")
+	// for index, val := range targetData {
+	// 	log.Println("Index:", index, val)
+	// }
 
 	network.Train(trainingData, targetData, iterations)
 
-	testNetwork(network, trainingData, targetData, genreCount, dataPerGenre, confidence)
-
 	// Store neural network on disk
 	gonn.DumpNN("genreclassification.nn", network)
+
+	testNetwork(network, trainingData, targetData, genreCount, dataPerGenre, confidence)
+
+	if args["-test"] {
+
+		if !args["-network"] {
+			client, err = initializeServer()
+			if err != nil {
+				log.Println(err)
+				return
+			}
+		}
+
+		testingData, err := generateGenreData(client, genres, testDataSize, false) // Never write test data to file
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		testingTargets := generateTargetData(genreCount, testDataSize)
+		testNetwork(network, testingData, testingTargets, genreCount, 10, confidence)
+	}
 }
 
 func testNetwork(network *gonn.NeuralNetwork, testingData [][]float64, targetData [][]float64, genreCount int, dataPerGenre int, confidence float64) {
@@ -152,6 +158,8 @@ func testNetwork(network *gonn.NeuralNetwork, testingData [][]float64, targetDat
 	log.Printf("Failure Rate: %.2f\n", failureRate)
 }
 
+// Data Generation
+
 func generateTargetData(genreCount int, dataPerGenre int) (targets [][]float64) {
 	total := genreCount * dataPerGenre
 
@@ -165,7 +173,7 @@ func generateTargetData(genreCount int, dataPerGenre int) (targets [][]float64) 
 	return targets
 }
 
-func generateGenreData(client *spotify.Client, genres []string, dataPerGenre int) (data [][]float64, err error) {
+func generateGenreData(client *spotify.Client, genres []string, dataPerGenre int, shouldWrite bool) (data [][]float64, err error) {
 	seeds := formatSeeds(genres)
 
 	log.Println("Generating recommendations...")
@@ -194,15 +202,16 @@ func generateGenreData(client *spotify.Client, genres []string, dataPerGenre int
 		return nil, err
 	}
 	features := formatFeatures(rawFeatures)
-
-	log.Println("Writing Files...")
-	err = writeFiles("analyses.txt", "features.txt", analyses, rawFeatures)
-	if err != nil {
-		return nil, err
-	}
-
 	for index, val := range features {
 		log.Println("Index:", index, val)
+	}
+
+	if shouldWrite {
+		log.Println("Writing Files...")
+		err = writeFiles("analyses.txt", "features.txt", analyses, rawFeatures)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	log.Println("Formatting Data...")
@@ -227,10 +236,10 @@ func formatData(analyses []*spotify.AudioAnalysis, features [][]float64) (data [
 		var datum []float64
 		datum = append(datum, val.TrackInfo.Duration)
 		datum = append(datum, val.TrackInfo.Tempo)
-		//datum = append(datum, float64(val.TrackInfo.TimeSignature))
-		//datum = append(datum, float64(val.TrackInfo.Key))
+		datum = append(datum, float64(val.TrackInfo.TimeSignature)) // Might remove
+		datum = append(datum, float64(val.TrackInfo.Key))           //
 		datum = append(datum, val.TrackInfo.Loudness)
-		//datum = append(datum, float64(val.TrackInfo.Mode))
+		datum = append(datum, float64(val.TrackInfo.Mode)) //
 
 		datum = append(datum, features[index]...) // Concatenate datum and features
 		data = append(data, datum)
@@ -271,7 +280,7 @@ func formatFeatures(tracks []*spotify.AudioFeatures) (features [][]float64) {
 		track = append(track, float64(val.Acousticness))
 		track = append(track, float64(val.Danceability))
 		track = append(track, float64(val.Energy))
-		//track = append(track, float64(val.Instrumentalness))
+		track = append(track, float64(val.Instrumentalness)) // Might remove
 		track = append(track, float64(val.Liveness))
 		track = append(track, float64(val.Speechiness))
 		track = append(track, float64(val.Valence))
@@ -306,15 +315,29 @@ func getIDs(recs []*spotify.Recommendations) (ids []spotify.ID) {
 }
 
 func generateRecommendations(client *spotify.Client, seeds []spotify.Seeds, limit int) (recs []*spotify.Recommendations, err error) {
+	iterationsPerSeed := limit / 100
+	remainder := limit % 100
+	hundred := 100
 	attr := spotify.NewTrackAttributes()
-	opts := spotify.Options{Limit: &limit}
+	maxOpts := spotify.Options{Limit: &hundred}
+	remainderOpts := spotify.Options{Limit: &remainder}
 
+	log.Println("Iterating through seeds")
 	for _, val := range seeds {
-		newRec, err := client.GetRecommendations(val, attr, &opts)
-		if err != nil {
-			return nil, err
+		for i := 0; i < iterationsPerSeed; i++ {
+			newRec, err := client.GetRecommendations(val, attr, &maxOpts)
+			if err != nil {
+				return nil, err
+			}
+			recs = append(recs, newRec)
 		}
-		recs = append(recs, newRec)
+		if remainder > 0 {
+			newRec, err := client.GetRecommendations(val, attr, &remainderOpts)
+			if err != nil {
+				return nil, err
+			}
+			recs = append(recs, newRec)
+		}
 	}
 
 	return recs, nil
@@ -355,6 +378,24 @@ func trainNetwork() {
 }
 
 // I/O Functions
+
+func initializeArgMap(argList []string) map[string]bool {
+	argMap := make(map[string]bool, 3)
+	for _, val := range argList {
+		argMap[val] = false
+	}
+	return argMap
+}
+
+func resolveCommandArgs(argMap map[string]bool) {
+	for _, val := range os.Args {
+		for index := range argMap {
+			if strings.EqualFold(index, val) {
+				argMap[index] = true
+			}
+		}
+	}
+}
 
 func writeFiles(analysisFileName string, featureFileName string, analyses []*spotify.AudioAnalysis, features []*spotify.AudioFeatures) (err error) {
 	err = writeAnalysesFile(analysisFileName, analyses)
@@ -466,6 +507,25 @@ func writeFeaturesFile(fileName string, features []*spotify.AudioFeatures) error
 
 // Network Functions
 
+func initializeServer() (client *spotify.Client, err error) {
+	// Set SPOTIFY_ID and SPOTIFY_SECRET
+	auth.SetAuthInfo(testID, testSecret)
+
+	// Start local HTTP Server
+	http.HandleFunc("/callback", completeAuth)
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Got request for:", r.URL.String())
+	})
+	go http.ListenAndServe(":8080", nil)
+
+	url := auth.AuthURL(state)
+	fmt.Println("Please log in to Spotify by visiting the following page in your browser:", url)
+
+	// Block until authorization complete
+	client = <-ch
+	return client, nil
+}
+
 func completeAuth(w http.ResponseWriter, r *http.Request) {
 	tok, err := auth.Token(state, r)
 	if err != nil {
@@ -476,7 +536,7 @@ func completeAuth(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		log.Fatalf("State mismatch: %s != %s\n", st, state)
 	}
-	// use the token to get an authenticated client
+	// Retrieve authenticated client using token
 	client := auth.NewClient(tok)
 	fmt.Fprintf(w, "Login Completed!")
 	ch <- &client
