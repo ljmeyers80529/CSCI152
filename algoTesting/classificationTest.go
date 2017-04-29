@@ -19,8 +19,10 @@ const (
 	testSecret      = "a3790222803a4f8fbdd5cdd5a2ce64d9"
 	root            = "https://api.spotify.com/v1/"
 	authroot        = "https://accounts.spotify.com/authorize"
-	dataAmount      = 100
-	iterationAmount = 2500
+	dataPerGenreNum = 500
+	iterationNum    = 1000
+	confidenceNum   = 0.75
+	extraNodesNum   = 20
 )
 
 var (
@@ -33,18 +35,25 @@ var (
 // 1 - Generate training data using endpoint and save to local file
 // 2 - Generate training data using existing local file
 func main() {
-	var choice int
+	// Get command-line arguments
 	choice, err := strconv.Atoi(os.Args[1])
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 
-	// Specify genres
+	// Initialize variables assigned by constants
+	confidence := confidenceNum
+	dataPerGenre := dataPerGenreNum
+	extraNodes := extraNodesNum
+	iterations := iterationNum
+
+	// Initialize genre variables
 	var genres []string
 	genres = append(genres, "classical")
 	genres = append(genres, "pop")
 
+	// Initialize trainingData
 	var trainingData [][]float64
 
 	// Set up local server
@@ -62,139 +71,141 @@ func main() {
 		url := auth.AuthURL(state)
 		fmt.Println("Please log in to Spotify by visiting the following page in your browser:", url)
 
-		// wait for auth to complete
+		// Block until authorization complete
 		client := <-ch
 
-		// use the client to make calls that require authorization
+		// Assign current user according to client
 		user, err := client.CurrentUser()
 		if err != nil {
 			log.Fatal(err)
 		}
 		fmt.Println("You are logged in as:", user.ID)
 
-		// Generate Data
-		trainingData, err = generateGenreData(client, genres)
+		// Generate training data from endpoints
+		fmt.Println("Generating genre data...")
+		trainingData, err = generateGenreData(client, genres, dataPerGenre)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 	} else {
+		// Generate training data from file
+		log.Println("Reading genre data...")
 		trainingData, err = generateDataFromFile("analyses.txt", "features.txt")
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return
 		}
 	}
 
+	// Network operations
 	dataElementCount := len(trainingData[0])
 	genreCount := 2
-	// hiddenCount := (dataElementCount + genreCount) / 2
-	hiddenCount := dataElementCount + genreCount + 100
-
-	//network := gonn.NewNetwork(dataElementCount, hiddenCount, genreCount, false, 0.01, 0.001) // This is working sort of because of the false regression
-	network := gonn.NewNetwork(dataElementCount, hiddenCount, genreCount, false, 0.0001, 0.00001) // Might be overfitting
-	//network := gonn.NewNetwork(dataElementCount, hiddenCount, genreCount, true, 0.0001, 0.00001) // Might be overfitting
+	hiddenCount := dataElementCount + genreCount + extraNodes
 
 	//network := gonn.DefaultNetwork(dataElementCount, hiddenCount, genreCount, false)
-	targets := generateTargets()
+	//network := gonn.NewNetwork(dataElementCount, hiddenCount, genreCount, false, 0.01, 0.001) // This is working sort of because of the false regression
+	//network := gonn.NewNetwork(dataElementCount, hiddenCount, genreCount, true, 0.0001, 0.00001) // Might be overfitting
+	//network := gonn.NewNetwork(dataElementCount, hiddenCount, genreCount, true, 0.0005, 0.00005) // This seems to only rarely get bad results, best so far
+	network := gonn.NewNetwork(dataElementCount, hiddenCount, genreCount, true, 0.0005, 0.00005)
+	targetData := generateTargetData(genreCount, dataPerGenre)
 
-	fmt.Println("DATA")
+	// Debugging code
+	log.Println("TRAINING DATA")
 	for index, val := range trainingData {
-		fmt.Println("Index:", index, val)
+		log.Println("Index:", index, val)
 	}
-	fmt.Println("\nTARGETS")
-	for index, val := range targets {
-		fmt.Println("Index:", index, val)
+	log.Println("\nTARGET DATA")
+	for index, val := range targetData {
+		log.Println("Index:", index, val)
 	}
 
-	network.Train(trainingData, targets, iterationAmount)
+	network.Train(trainingData, targetData, iterations)
 
-	// for _, val := range trainingData {
-	// 	fmt.Println(network.Forward(val))
-	// }
-	testNetwork(trainingData, network)
+	testNetwork(network, trainingData, targetData, genreCount, dataPerGenre, confidence)
 
 	// Store neural network on disk
 	gonn.DumpNN("genreclassification.nn", network)
-
-	// Test neural network
-	// testingData, err := generateGenreData(client, genres)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return
-	// }
-	// testNetwork(testingData, network)
 }
 
-func testNetwork(testingData [][]float64, network *gonn.NeuralNetwork) {
-	fmt.Println("\nTesting Neural Network")
+func testNetwork(network *gonn.NeuralNetwork, testingData [][]float64, targetData [][]float64, genreCount int, dataPerGenre int, confidence float64) {
+	log.Println("\nTesting Neural Network")
+	passCount := 0
+	total := genreCount * dataPerGenre
 	for index, val := range testingData {
+		key := index / dataPerGenre
+		target := targetData[index]
 		result := network.Forward(val)
-		if index < dataAmount/2 {
-			fmt.Print("Key: {1, 0} ", result)
-			if result[0] > 0.5 {
-				fmt.Println("\tPass")
-			} else {
-				fmt.Println("\tFail")
-			}
+		if result[key] > confidence {
+			fmt.Print("Status: Pass  ")
+			passCount++
 		} else {
-			fmt.Print("Key: {0, 1} ", result)
-			if result[1] > 0.5 {
-				fmt.Println("\tPass")
-			} else {
-				fmt.Println("\tFail")
-			}
+			fmt.Print("Status: FAIL  ")
 		}
+		fmt.Println("Target: ", target, " Result: ", result)
 	}
+
+	log.Println("Accuracy Report")
+	successRate := float64(passCount) / float64(total)
+	log.Printf("Success Rate: %.2f\n", successRate)
+	failureRate := 1.0 - successRate
+	log.Printf("Failure Rate: %.2f\n", failureRate)
 }
 
-func generateTargets() [][]float64 {
-	targets := make([][]float64, dataAmount)
-	for i := 0; i < dataAmount/2; i++ {
-		targets[i] = []float64{1.0, 0.0}
+func generateTargetData(genreCount int, dataPerGenre int) (targets [][]float64) {
+	total := genreCount * dataPerGenre
+
+	for i := 0; i < total; i++ {
+		key := i / dataPerGenre
+		target := make([]float64, genreCount)
+		target[key] = 1
+		targets = append(targets, target)
 	}
-	for j := dataAmount / 2; j < dataAmount; j++ {
-		targets[j] = []float64{0.0, 1.0}
-	}
-
-	// targets := make([][]float64, 40)
-
-	// for i := 0; i < 20; i++ {
-	// 	targets[i] = []float64{0.0}
-	// }
-
-	// for j := 20; j < 40; j++ {
-	// 	targets[j] = []float64{1.0}
-	// }
 
 	return targets
 }
 
-func generateGenreData(client *spotify.Client, genres []string) (data [][]float64, err error) {
+func generateGenreData(client *spotify.Client, genres []string, dataPerGenre int) (data [][]float64, err error) {
 	seeds := formatSeeds(genres)
 
-	recs, err := generateRecommendations(client, seeds, dataAmount/2)
+	log.Println("Generating recommendations...")
+	recs, err := generateRecommendations(client, seeds, dataPerGenre)
 	if err != nil {
 		return nil, err
 	}
 
+	log.Println("Getting ID's...")
 	ids := getIDs(recs)
+	log.Println(ids)
+	log.Println(len(ids))
 
-	err = writeFiles(client, "analyses.txt", "features.txt", ids)
-	if err != nil {
-		return nil, err
-	}
-
+	log.Println("Getting analyses...")
 	analyses, err := getAnalyses(client, ids)
 	if err != nil {
 		return nil, err
 	}
+	for index := range analyses {
+		log.Println("Index:", index, "analysis")
+	}
 
-	features, err := getFeatures(client, ids)
+	log.Println("Getting Features...")
+	rawFeatures, err := getFeatures(client, ids)
+	if err != nil {
+		return nil, err
+	}
+	features := formatFeatures(rawFeatures)
+
+	log.Println("Writing Files...")
+	err = writeFiles("analyses.txt", "features.txt", analyses, rawFeatures)
 	if err != nil {
 		return nil, err
 	}
 
+	for index, val := range features {
+		log.Println("Index:", index, val)
+	}
+
+	log.Println("Formatting Data...")
 	data = formatData(analyses, features)
 	return data, nil
 }
@@ -227,23 +238,30 @@ func formatData(analyses []*spotify.AudioAnalysis, features [][]float64) (data [
 	return data
 }
 
-func getFeatures(client *spotify.Client, ids []spotify.ID) (features [][]float64, err error) {
-	tracks, err := client.GetAudioFeatures(ids...)
-	if err != nil {
-		return nil, err
+func getFeatures(client *spotify.Client, ids []spotify.ID) (features []*spotify.AudioFeatures, err error) {
+	idCopies := ids // Prevent modifying ID slice
+	idsLeftToProcess := len(idCopies)
+
+	for idsLeftToProcess > 100 {
+		currentIDs := idCopies[:100]
+		currentFeatures, err := client.GetAudioFeatures(currentIDs...)
+		if err != nil {
+			return nil, err
+		}
+		features = append(features, currentFeatures...)
+
+		idCopies = idCopies[100:]
+		idsLeftToProcess = len(idCopies)
 	}
-	features = formatFeatures(tracks)
-	// for _, val := range tracks {
-	// 	var track []float64
-	// 	track = append(track, float64(val.Acousticness))
-	// 	track = append(track, float64(val.Danceability))
-	// 	track = append(track, float64(val.Energy))
-	// 	track = append(track, float64(val.Instrumentalness))
-	// 	track = append(track, float64(val.Liveness))
-	// 	track = append(track, float64(val.Speechiness))
-	// 	track = append(track, float64(val.Valence))
-	// 	features = append(features, track)
-	// }
+
+	if idsLeftToProcess > 0 {
+		currentFeatures, err := client.GetAudioFeatures(idCopies...)
+		if err != nil {
+			return nil, err
+		}
+		features = append(features, currentFeatures...)
+	}
+
 	return features, nil
 }
 
@@ -253,7 +271,7 @@ func formatFeatures(tracks []*spotify.AudioFeatures) (features [][]float64) {
 		track = append(track, float64(val.Acousticness))
 		track = append(track, float64(val.Danceability))
 		track = append(track, float64(val.Energy))
-		track = append(track, float64(val.Instrumentalness))
+		//track = append(track, float64(val.Instrumentalness))
 		track = append(track, float64(val.Liveness))
 		track = append(track, float64(val.Speechiness))
 		track = append(track, float64(val.Valence))
@@ -263,13 +281,16 @@ func formatFeatures(tracks []*spotify.AudioFeatures) (features [][]float64) {
 }
 
 func getAnalyses(client *spotify.Client, ids []spotify.ID) (analyses []*spotify.AudioAnalysis, err error) {
-	for _, val := range ids {
+	for index, val := range ids {
+		log.Println("\tGetting analysis", index, "for", val)
 		analysis, err := client.GetAudioAnalysis(val)
 		if err != nil {
 			return nil, err
 		}
 		analyses = append(analyses, analysis)
+		log.Println("\tAnalysis successful.")
 	}
+	log.Println("\tReturning analyses")
 
 	return analyses, nil
 }
@@ -285,7 +306,6 @@ func getIDs(recs []*spotify.Recommendations) (ids []spotify.ID) {
 }
 
 func generateRecommendations(client *spotify.Client, seeds []spotify.Seeds, limit int) (recs []*spotify.Recommendations, err error) {
-	//limit := dataAmount / 2
 	attr := spotify.NewTrackAttributes()
 	opts := spotify.Options{Limit: &limit}
 
@@ -334,17 +354,9 @@ func trainNetwork() {
 	}
 }
 
-func writeFiles(client *spotify.Client, analysisFileName string, featureFileName string, ids []spotify.ID) error {
-	analyses, err := getAnalyses(client, ids)
-	if err != nil {
-		return err
-	}
+// I/O Functions
 
-	features, err := client.GetAudioFeatures(ids...)
-	if err != nil {
-		return err
-	}
-
+func writeFiles(analysisFileName string, featureFileName string, analyses []*spotify.AudioAnalysis, features []*spotify.AudioFeatures) (err error) {
 	err = writeAnalysesFile(analysisFileName, analyses)
 	if err != nil {
 		return err
@@ -451,6 +463,8 @@ func writeFeaturesFile(fileName string, features []*spotify.AudioFeatures) error
 	writer.Flush()
 	return nil
 }
+
+// Network Functions
 
 func completeAuth(w http.ResponseWriter, r *http.Request) {
 	tok, err := auth.Token(state, r)
