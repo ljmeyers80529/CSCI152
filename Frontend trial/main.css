@@ -162,6 +162,11 @@ header{
     flex-direction: row;
 }
 
+#btf2{
+    background: url("img/btf1.jpg") no-repeat center center;
+	background-size: cover;
+}
+
 #container1, #container3{
     text-align: center;
     float: left;
@@ -197,9 +202,6 @@ float: right;
     height: 100px;
     background: black; /* For browsers that do not support gradients */
     background: linear-gradient(black, #222); /* Standard syntax (must be last) */
-
-
-
 }
 
 
