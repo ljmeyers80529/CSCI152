@@ -3,13 +3,16 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/fxsjy/gonn/gonn"
+	"github.com/mdesenfants/gokmeans"
 	"github.com/zmb3/spotify"
 )
 
@@ -32,6 +35,11 @@ var (
 	state = "abc123"
 )
 
+// Centroid holds the slice of slices of node data for different input data
+type Centroid struct {
+	Tatums [][]gokmeans.Node
+}
+
 // Command line arguments are as follows:
 // -network : Explicitly use network to generate genre data
 // -test : Run a neural network test using small test cases generated using network
@@ -52,7 +60,7 @@ func main() {
 	testDataSize := testDataSizeNum
 
 	// Initialize genre variables
-	genres := []string{"classical", "pop"}
+	genres := []string{"classical", "pop", "rock", "electronic"}
 
 	// Initialize trainingData and error
 	var trainingData [][]float64
@@ -108,6 +116,8 @@ func main() {
 
 	network.Train(trainingData, targetData, iterations)
 
+	time.Sleep(10 * time.Second)
+
 	// Store neural network on disk
 	gonn.DumpNN("genreclassification.nn", network)
 
@@ -160,6 +170,79 @@ func testNetwork(network *gonn.NeuralNetwork, testingData [][]float64, targetDat
 
 // Data Generation
 
+func formatRawCentroids(rawCentroids [][]gokmeans.Node) (centroids [][]float64) {
+	for _, val := range rawCentroids {
+		singleCentroid := val[0]
+		centroids = append(centroids, singleCentroid)
+	}
+
+	return centroids
+}
+
+func generateCentroidData(analyses []*spotify.AudioAnalysis) (tatumCentroids [][]gokmeans.Node, err error) {
+	tatumCentroids, err = generateRawTatumCentroids(analyses)
+	if err != nil {
+		return nil, err
+	}
+
+	return tatumCentroids, nil
+}
+
+func generateRawTatumCentroids(analyses []*spotify.AudioAnalysis) (rawTatumCentroids [][]gokmeans.Node, err error) {
+	tatumNodes := generateTatumNodes(analyses)
+	for _, val := range tatumNodes {
+		success, rawCentroids := gokmeans.Train(val, 4, 50)
+		if !success {
+			err = errors.New("centroid training has failed")
+			return nil, err
+		}
+		log.Println("Success!\nDisplaying centroids")
+		for _, centroid := range rawCentroids {
+			log.Println(centroid)
+		}
+		rawTatumCentroids = append(rawTatumCentroids, rawCentroids)
+	}
+
+	return rawTatumCentroids, nil
+}
+
+func generatePrimitiveTatumCentroids(analyses []*spotify.AudioAnalysis) (tatumCentroids [][]float64, err error) {
+	tatumNodes := generateTatumNodes(analyses)
+	for index, val := range tatumNodes {
+		success, rawCentroids := gokmeans.Train(val, 4, 20)
+		if !success {
+			err = errors.New("centroid training has failed")
+			return nil, err
+		}
+		log.Println("Success! Displaying centroids for track ", index)
+		for _, centroid := range rawCentroids {
+			log.Println(centroid)
+		}
+		var centroids []float64
+		// Loop through the current slice of nodes and extract the underlying floats from each
+		for _, rawNode := range rawCentroids {
+			underlyingFloat := []float64(rawNode)[0]
+			centroids = append(centroids, underlyingFloat)
+		}
+
+		tatumCentroids = append(tatumCentroids, centroids)
+	}
+
+	return tatumCentroids, nil
+}
+
+func generateTatumNodes(analyses []*spotify.AudioAnalysis) (tatumNodes [][]gokmeans.Node) {
+	for _, val := range analyses {
+		var nodes []gokmeans.Node
+		for _, tatum := range val.Tatums {
+			tempNode := gokmeans.Node{tatum.Duration}
+			nodes = append(nodes, tempNode)
+		}
+		tatumNodes = append(tatumNodes, nodes)
+	}
+	return tatumNodes
+}
+
 func generateTargetData(genreCount int, dataPerGenre int) (targets [][]float64) {
 	total := genreCount * dataPerGenre
 
@@ -173,7 +256,7 @@ func generateTargetData(genreCount int, dataPerGenre int) (targets [][]float64) 
 	return targets
 }
 
-func generateGenreData(client *spotify.Client, genres []string, dataPerGenre int, shouldWrite bool) (data [][]float64, err error) {
+func generateGenreData(client *spotify.Client, genres []string, dataPerGenre int, shouldWrite bool) (genreData [][]float64, err error) {
 	seeds := formatSeeds(genres)
 
 	log.Println("Generating recommendations...")
@@ -188,62 +271,103 @@ func generateGenreData(client *spotify.Client, genres []string, dataPerGenre int
 	log.Println(len(ids))
 
 	log.Println("Getting analyses...")
-	analyses, err := getAnalyses(client, ids)
+	rawAnalyses, err := getAnalyses(client, ids)
 	if err != nil {
 		return nil, err
 	}
-	for index := range analyses {
+	for index := range rawAnalyses {
 		log.Println("Index:", index, "analysis")
 	}
+	// rawTatumCentroids := generateCentroidData(rawAnalyses)
+	// tatumCentroids := formatTatumCentroids(rawTatumCentroids)
+	tatumCentroids, err := generatePrimitiveTatumCentroids(rawAnalyses)
 
-	log.Println("Getting Features...")
+	log.Println("Formatting analyses...")
+	analyses := formatAnalyses(rawAnalyses, tatumCentroids)
+
+	log.Println("Getting features...")
 	rawFeatures, err := getFeatures(client, ids)
 	if err != nil {
 		return nil, err
 	}
+
+	log.Println("Formatting features...")
 	features := formatFeatures(rawFeatures)
 	for index, val := range features {
 		log.Println("Index:", index, val)
 	}
 
 	if shouldWrite {
-		log.Println("Writing Files...")
-		err = writeFiles("analyses.txt", "features.txt", analyses, rawFeatures)
+		log.Println("Writing files...")
+		err = writeFiles("analyses.txt", "features.txt", rawAnalyses, rawFeatures)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	log.Println("Formatting Data...")
-	data = formatData(analyses, features)
-	return data, nil
+	log.Println("Formatting genre data...")
+	genreData = formatData(analyses, features)
+	return genreData, nil
 }
 
-func generateDataFromFile(analysisFileName string, featureFileName string) (data [][]float64, err error) {
-	analyses, rawFeatures, err := readFiles(analysisFileName, featureFileName)
+func generateDataFromFile(analysisFileName string, featureFileName string) (genreData [][]float64, err error) {
+	rawAnalyses, rawFeatures, err := readFiles(analysisFileName, featureFileName)
 	if err != nil {
 		return nil, err
 	}
 
+	tatumCentroids, err := generatePrimitiveTatumCentroids(rawAnalyses)
+	if err != nil {
+		return nil, err
+	}
+	analyses := formatAnalyses(rawAnalyses, tatumCentroids)
 	features := formatFeatures(rawFeatures)
 
-	data = formatData(analyses, features)
-	return data, nil
+	genreData = formatData(analyses, features)
+	return genreData, nil
 }
 
-func formatData(analyses []*spotify.AudioAnalysis, features [][]float64) (data [][]float64) {
+func formatAnalyses(rawAnalyses []*spotify.AudioAnalysis, tatumCentroids [][]float64) (analyses [][]float64) {
+	for index, val := range rawAnalyses {
+		var analysis []float64
+		analysis = append(analysis, val.TrackInfo.Duration)
+		analysis = append(analysis, val.TrackInfo.Tempo)
+		analysis = append(analysis, float64(val.TrackInfo.TimeSignature)) // Might remove
+		analysis = append(analysis, float64(val.TrackInfo.Key))           //
+		analysis = append(analysis, val.TrackInfo.Loudness)
+		analysis = append(analysis, float64(val.TrackInfo.Mode)) //
+		analysis = append(analysis, tatumCentroids[index]...)
+
+		analyses = append(analyses, analysis)
+	}
+	return analyses
+}
+
+// func formatData(analyses []*spotify.AudioAnalysis, features [][]float64) (data [][]float64) {
+// 	for index, val := range analyses {
+// 		var datum []float64
+// 		datum = append(datum, val.TrackInfo.Duration)
+// 		datum = append(datum, val.TrackInfo.Tempo)
+// 		//datum = append(datum, float64(val.TrackInfo.TimeSignature)) // Might remove
+// 		//datum = append(datum, float64(val.TrackInfo.Key))           //
+// 		datum = append(datum, val.TrackInfo.Loudness)
+// 		//datum = append(datum, float64(val.TrackInfo.Mode)) //
+
+// 		datum = append(datum, features[index]...) // Concatenate datum and features
+// 		data = append(data, datum)
+// 	}
+// 	return data
+// }
+
+func formatData(analyses [][]float64, features [][]float64) (data [][]float64) {
 	for index, val := range analyses {
 		var datum []float64
-		datum = append(datum, val.TrackInfo.Duration)
-		datum = append(datum, val.TrackInfo.Tempo)
-		datum = append(datum, float64(val.TrackInfo.TimeSignature)) // Might remove
-		datum = append(datum, float64(val.TrackInfo.Key))           //
-		datum = append(datum, val.TrackInfo.Loudness)
-		datum = append(datum, float64(val.TrackInfo.Mode)) //
+		datum = append(datum, val...)
+		datum = append(datum, features[index]...)
 
-		datum = append(datum, features[index]...) // Concatenate datum and features
 		data = append(data, datum)
 	}
+
 	return data
 }
 
