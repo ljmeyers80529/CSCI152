@@ -5,34 +5,6 @@
     <link rel = "stylesheet" type="text/css" href="main.css">
 </head>
 
-<style>
-content{
-	text-align:right;
-    float: right;
-    width: 75%;
-}
-login{
-	display: inline-block;
-    width: 25%;
-    background: url("img/loginbg.jpg");
-	background-size: cover;
-}
-
-#th{
-        display: inline-block;
-        width: 100%;
-        background: url("img/btf1.jpg")fixed;
-        background-size: cover;
-    }
-
-#bf{
-    display: inline-block;
-    width: 100%;
-    background: url("img/test4.jpg")fixed;
-    background-size: cover;
-}
-</style>
-
 <header>
     <a href="homepage.html"><img src="img/test1nobg.png" id="navlogo" ></a>
     <div class="nav">
@@ -45,10 +17,9 @@ login{
                    <class="submit"><input type="submit" name="cmdbutton" value="Login"></p></li>
             {{else}}
             <li class="dropdown">
-                <a href="#drop">SETTINGS</a>
+                <a href="#drop">{{.username}}</a>
                 <div class = "dropdown-content">
-                    <a href="#">Preferances</a>
-                    <a href="#">Sharing</a>
+                    <a href="#">Settings</a>
                     <a href="#">Signout</a>
                 </div>
             </li>
@@ -102,74 +73,64 @@ login{
 
 	<div class="btf1">
 		<div id="th">
-		<div id="container1">
-			<h1>Taste Taste</h1>
-			<img src="img/test1nobg.jpg">
-			<p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
-			<p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
-			<p>TESTING NAV BAR FIXED POSITION</p>
-			<p>TESTING NAV BAR FIXED POSITION</p>
-			<p>TESTING NAV BAR FIXED POSITION</p>
-		</div>
+            <div id="container1">
+                <h1>Taste Taste</h1>
+                <img src="img/test1nobg.jpg">
+                <p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
+                <p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
+                <p>TESTING NAV BAR FIXED POSITION</p>
+                <p>TESTING NAV BAR FIXED POSITION</p>
+                <p>TESTING NAV BAR FIXED POSITION</p>
+            </div>
 
-        <div id = "player">
-            <h1>Sample Playlist</h1>
-            <iframe src="https://embed.spotify.com/?uri=spotify:user:spotify:playlist:3rgsDhGHZxZ9sB9DQWQfuf" width="520" height="440" frameborder="0"></iframe>
+            <div id = "player">
+                <h1>Sample Playlist</h1>
+                <iframe src="https://embed.spotify.com/?uri=spotify:user:spotify:playlist:3rgsDhGHZxZ9sB9DQWQfuf" width="520" height="440" frameborder="0"></iframe>
+            </div>
         </div>
-	</div>
+        
         <div id="grad2">
 
         </div>
+        
         <div id="bf">
-		<div id="container2">
-			<h1>Taste Taste</h1>
-			<img src="img/test1.jpg">
-			<p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
-			<p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
-			<p>TESTING NAV BAR FIXED POSITION</p>
-			<p>TESTING NAV BAR FIXED POSITION</p>
-			<p>TESTING NAV BAR FIXED POSITION</p>
-		</div>
+            <div id="container2">
+                <h1>Taste Taste</h1>
+                <img src="img/test1.jpg">
+                <p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
+                <p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
+                <p>TESTING NAV BAR FIXED POSITION</p>
+                <p>TESTING NAV BAR FIXED POSITION</p>
+                <p>TESTING NAV BAR FIXED POSITION</p>
+            </div>
 
-	<div id = "btf2">
-
-		<div id="container3">
-			<h1>Taste Taste</h1>
-			<img src="img/taste.jpeg" width = "300" height="300">
-			<p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
-			<p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
-			<p>TESTING NAV BAR FIXED POSITION</p>
-			<p>TESTING NAV BAR FIXED POSITION</p>
-			<p>TESTING NAV BAR FIXED POSITION</p>
-		</div>
-
-	</div>
+            <div id = "btf2">
+                <div id="container3">
+                    <h1>Taste Taste</h1>
+                    <img src="img/taste.jpeg" width = "300" height="300">
+                    <p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
+                    <p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
+                    <p>TESTING NAV BAR FIXED POSITION</p>
+                    <p>TESTING NAV BAR FIXED POSITION</p>
+                    <p>TESTING NAV BAR FIXED POSITION</p>
+                </div>
+            </div>
         </div>
     </div>
-        <!--<div id = "player">
-            <h1>Sample Playlist</h1>
-            <iframe src="https://embed.spotify.com/?uri=spotify:user:spotify:playlist:3rgsDhGHZxZ9sB9DQWQfuf" width="620" height="540" frameborder="0"></iframe>
-        </div>-->
-
-    <div id="footer">
-
-    </div>
-
 </body>
-
-
 
 <!-----------------------THIS SECTION WILL BE FOR THE STUFF NOT SHOWN IF USER IS LOGGED IN--------------------------------->
 
-<!--
 {{else}}
 <body>
-	<div class = "bottom">
-        <div id = "player">
-<iframe src="https://embed.spotify.com/?uri=spotify:user:spotify:playlist:3rgsDhGHZxZ9sB9DQWQfuf" width="720" height="640" frameborder="0"></iframe>
-
-</div>
-</div>
+    <div id = "playerLogIn">
+        <iframe src="https://embed.spotify.com/?uri=spotify:user:spotify:playlist:{{.userPlaylistID}}" width="720" height="640" frameborder="0"></iframe>
+        <!-- 
+            Add in the radar chart here.
+        -->
+    </div>
+    <div id = "radar">
+        <h1>Radar Graph</h1>
+    </div>
 </body>
 {{end}}
--->

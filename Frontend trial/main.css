@@ -197,9 +197,22 @@ header{
 */
 
 #player{
-float: right;
+    float:right;
 }
 
+#playerLogIn{
+    float: left;
+    width: 75%;
+    background: url("img/HeadphoneHomepage1.jpg");
+	background-size: cover;
+}
+
+#radar{
+	display: inline-block;
+    width: 25%;
+    background: url("img/loginbg.jpg");
+	background-size: cover;
+}
 
 #grad1{
     height: 70px;
@@ -220,7 +233,7 @@ float: right;
 
 
 #grad2{
-    height: 70px;
+    height: 78px;
     background: #575757;
     background: linear-gradient(#575757, black);
 }
@@ -234,4 +247,30 @@ float: right;
     left:0px;
     right:0px;
     margin-bottom:0px;
+}
+#content{
+	text-align:right;
+    float: right;
+    width: 75%;
+}
+
+#login{
+	display: inline-block;
+    width: 25%;
+    background: url("img/loginbg.jpg");
+	background-size: cover;
+}
+
+#th{
+        display: inline-block;
+        width: 100%;
+        background: url("img/btf1.jpg")fixed;
+        background-size: cover;
+    }
+
+#bf{
+    display: inline-block;
+    width: 100%;
+    background: url("img/test4.jpg")fixed;
+    background-size: cover;
 }
