@@ -15,7 +15,7 @@ header{
     position:fixed; /*keep header in place as you scroll*/
     background: #1ED760; /*change color of header*/
     top:0px; /*star at 0 position from top */
-    opacity: .8; /*trasperency*/
+    opacity: .7; /*trasperency*/
 }
 
 /*fucks wit logo on nav bar */
@@ -202,19 +202,9 @@ float: right;
 
 
 #grad1{
-    height: 100px;
+    height: 70px;
     background: black; /* For browsers that do not support gradients */
-    background: linear-gradient(black, #222); /* Standard syntax (must be last) */
-}
-
-
-#BottomPart {
-    position: fixed;
-    z-index: 100;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: black;
+    background: linear-gradient(black, #575757); /* Standard syntax (must be last) */
 }
 
 
@@ -226,4 +216,22 @@ float: right;
     /*background: url("img/HeadphoneHomepage1.jpg") no-repeat center center;*/
     /*background-size: cover;*/
 
+}
+
+
+#grad2{
+    height: 70px;
+    background: #575757;
+    background: linear-gradient(#575757, black);
+}
+
+
+#footer{
+    position:fixed;
+    height:3px;
+    background-color: darkred;
+    bottom:0px;
+    left:0px;
+    right:0px;
+    margin-bottom:0px;
 }
