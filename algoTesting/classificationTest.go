@@ -1,8 +1,11 @@
 // +build ignore
 package csci152
 
+// package main
+
 // import (
 // 	"bufio"
+// 	"encoding/gob"
 // 	"encoding/json"
 // 	"errors"
 // 	"fmt"
@@ -11,6 +14,10 @@ package csci152
 // 	"os"
 // 	"strings"
 // 	"time"
+
+// 	"io"
+
+// 	"math"
 
 // 	"github.com/fxsjy/gonn/gonn"
 // 	"github.com/mdesenfants/gokmeans"
@@ -24,9 +31,9 @@ package csci152
 // 	root            = "https://api.spotify.com/v1/"
 // 	authroot        = "https://accounts.spotify.com/authorize"
 // 	dataPerGenreNum = 300 // 500 breaks something; using 300 for standard
-// 	iterationNum    = 1000
-// 	confidenceNum   = 0.95
-// 	extraNodesNum   = 5
+// 	iterationNum    = 2500
+// 	confidenceNum   = 0.35
+// 	extraNodesNum   = 50
 // 	testDataSizeNum = 10
 // )
 
@@ -41,6 +48,8 @@ package csci152
 // 	Tatums [][]gokmeans.Node
 // }
 
+// var logger *log.Logger
+
 // // Command line arguments are as follows:
 // // -network : Explicitly use network to generate genre data
 // // -test : Run a neural network test using small test cases generated using network
@@ -48,8 +57,15 @@ package csci152
 // // Default: Use local training data from files on disk, don't run test, don't write new files
 
 // func main() {
+// 	logf, err := os.OpenFile("log.txt", os.O_WRONLY|os.O_CREATE, 0640)
+// 	if err != nil {
+// 		log.Fatalln(err)
+// 	}
+// 	log.SetOutput(logf)
+// 	logger = log.New(io.MultiWriter(logf, os.Stdout), "logger:", log.LstdFlags)
+// 	startTime := time.Now()
 // 	// Get command-line arguments
-// 	argList := []string{"-network", "-test", "-write"}
+// 	argList := []string{"-network", "-test", "-write", "-standardize"}
 // 	args := initializeArgMap(argList)
 // 	resolveCommandArgs(args)
 
@@ -65,32 +81,37 @@ package csci152
 
 // 	// Initialize trainingData and error
 // 	var trainingData [][]float64
-// 	var err error
 // 	var client *spotify.Client
 
 // 	// Set up local server
 // 	if args["-network"] {
 // 		client, err = initializeServer()
 // 		if err != nil {
-// 			log.Println(err)
+// 			logger.Println(err)
 // 			return
 // 		}
 
 // 		// Generate training data from endpoints
-// 		log.Println("Generating genre data...")
+// 		logger.Println("Generating genre data...")
 // 		trainingData, err = generateGenreData(client, genres, dataPerGenre, args["-write"])
 // 		if err != nil {
-// 			log.Println(err)
+// 			logger.Println(err)
 // 			return
 // 		}
 // 	} else {
 // 		// Generate training data from file
-// 		log.Println("Reading genre data...")
-// 		trainingData, err = generateDataFromFile("analyses.txt", "features.txt")
+// 		logger.Println("Reading genre data...")
+// 		trainingData, err = generateDataFromFile("analyses.txt", "features.txt", "tatumCentroids.txt", args["-write"])
 // 		if err != nil {
-// 			log.Println(err)
+// 			logger.Println(err)
 // 			return
 // 		}
+// 	}
+
+// 	// Data standardization
+// 	if args["-standardize"] {
+// 		temp := trainingData
+// 		trainingData = standardizeData(temp)
 // 	}
 
 // 	// Network operations
@@ -106,18 +127,16 @@ package csci152
 // 	targetData := generateTargetData(genreCount, dataPerGenre)
 
 // 	// Debugging code
-// 	// log.Println("TRAINING DATA")
-// 	// for index, val := range trainingData {
-// 	// 	log.Println("Index:", index, val)
-// 	// }
-// 	// log.Println("\nTARGET DATA")
+// 	logger.Println("TRAINING DATA")
+// 	for index, val := range trainingData {
+// 		logger.Println("Index:", index, val)
+// 	}
+// 	// logger.Println("\nTARGET DATA")
 // 	// for index, val := range targetData {
-// 	// 	log.Println("Index:", index, val)
+// 	// 	logger.Println("Index:", index, val)
 // 	// }
 
 // 	network.Train(trainingData, targetData, iterations)
-
-// 	time.Sleep(10 * time.Second)
 
 // 	// Store neural network on disk
 // 	gonn.DumpNN("genreclassification.nn", network)
@@ -129,24 +148,26 @@ package csci152
 // 		if !args["-network"] {
 // 			client, err = initializeServer()
 // 			if err != nil {
-// 				log.Println(err)
+// 				logger.Println(err)
 // 				return
 // 			}
 // 		}
 
 // 		testingData, err := generateGenreData(client, genres, testDataSize, false) // Never write test data to file
 // 		if err != nil {
-// 			log.Println(err)
+// 			logger.Println(err)
 // 			return
 // 		}
 
 // 		testingTargets := generateTargetData(genreCount, testDataSize)
 // 		testNetwork(network, testingData, testingTargets, genreCount, 10, confidence)
 // 	}
+// 	elapsedTime := time.Since(startTime)
+// 	logger.Printf("Execution time: %s", elapsedTime)
 // }
 
 // func testNetwork(network *gonn.NeuralNetwork, testingData [][]float64, targetData [][]float64, genreCount int, dataPerGenre int, confidence float64) {
-// 	log.Println("\nTesting Neural Network")
+// 	logger.Println("\nTesting Neural Network")
 // 	passCount := 0
 // 	total := genreCount * dataPerGenre
 // 	for index, val := range testingData {
@@ -154,19 +175,19 @@ package csci152
 // 		target := targetData[index]
 // 		result := network.Forward(val)
 // 		if result[key] > confidence {
-// 			fmt.Print("Status: Pass  ")
+// 			logger.Print("Status: Pass  ")
 // 			passCount++
 // 		} else {
-// 			fmt.Print("Status: FAIL  ")
+// 			logger.Print("Status: FAIL  ")
 // 		}
-// 		fmt.Println("Target: ", target, " Result: ", result)
+// 		logger.Println("Target: ", target, " Result: ", result)
 // 	}
 
-// 	log.Println("Accuracy Report")
+// 	logger.Println("Accuracy Report")
 // 	successRate := float64(passCount) / float64(total)
-// 	log.Printf("Success Rate: %.2f\n", successRate)
+// 	logger.Printf("Success Rate: %.2f\n", successRate)
 // 	failureRate := 1.0 - successRate
-// 	log.Printf("Failure Rate: %.2f\n", failureRate)
+// 	logger.Printf("Failure Rate: %.2f\n", failureRate)
 // }
 
 // // Data Generation
@@ -192,14 +213,14 @@ package csci152
 // func generateRawTatumCentroids(analyses []*spotify.AudioAnalysis) (rawTatumCentroids [][]gokmeans.Node, err error) {
 // 	tatumNodes := generateTatumNodes(analyses)
 // 	for _, val := range tatumNodes {
-// 		success, rawCentroids := gokmeans.Train(val, 4, 50)
+// 		success, rawCentroids := gokmeans.Train(val, 2, 25)
 // 		if !success {
 // 			err = errors.New("centroid training has failed")
 // 			return nil, err
 // 		}
-// 		log.Println("Success!\nDisplaying centroids")
+// 		logger.Println("Success!\nDisplaying centroids")
 // 		for _, centroid := range rawCentroids {
-// 			log.Println(centroid)
+// 			logger.Println(centroid)
 // 		}
 // 		rawTatumCentroids = append(rawTatumCentroids, rawCentroids)
 // 	}
@@ -207,17 +228,23 @@ package csci152
 // 	return rawTatumCentroids, nil
 // }
 
+// // just input all the timbres or maybe a set of the timbres into the kmeans algorithm
+// func generatePrimitiveTimbreCentroids(analyses []*spotify.AudioAnalysis) (timbreCentroids [][]float64, err error) {
+
+// 	return timbreCentroids, nil
+// }
+
 // func generatePrimitiveTatumCentroids(analyses []*spotify.AudioAnalysis) (tatumCentroids [][]float64, err error) {
 // 	tatumNodes := generateTatumNodes(analyses)
 // 	for index, val := range tatumNodes {
-// 		success, rawCentroids := gokmeans.Train(val, 4, 20)
+// 		success, rawCentroids := gokmeans.Train(val, 3, 15)
 // 		if !success {
 // 			err = errors.New("centroid training has failed")
 // 			return nil, err
 // 		}
-// 		log.Println("Success! Displaying centroids for track ", index)
+// 		logger.Println("Success! Displaying centroids for track ", index)
 // 		for _, centroid := range rawCentroids {
-// 			log.Println(centroid)
+// 			logger.Println(centroid)
 // 		}
 // 		var centroids []float64
 // 		// Loop through the current slice of nodes and extract the underlying floats from each
@@ -260,105 +287,78 @@ package csci152
 // func generateGenreData(client *spotify.Client, genres []string, dataPerGenre int, shouldWrite bool) (genreData [][]float64, err error) {
 // 	seeds := formatSeeds(genres)
 
-// 	log.Println("Generating recommendations...")
+// 	logger.Println("Generating recommendations...")
 // 	recs, err := generateRecommendations(client, seeds, dataPerGenre)
 // 	if err != nil {
 // 		return nil, err
 // 	}
 
-// 	log.Println("Getting ID's...")
+// 	logger.Println("Getting ID's...")
 // 	ids := getIDs(recs)
-// 	log.Println(ids)
-// 	log.Println(len(ids))
+// 	logger.Println(ids)
+// 	logger.Println(len(ids))
 
-// 	log.Println("Getting analyses...")
+// 	logger.Println("Getting analyses...")
 // 	rawAnalyses, err := getAnalyses(client, ids)
 // 	if err != nil {
 // 		return nil, err
 // 	}
 // 	for index := range rawAnalyses {
-// 		log.Println("Index:", index, "analysis")
+// 		logger.Println("Index:", index, "analysis")
 // 	}
+
+// 	logger.Println("Generating centroids...")
 // 	// rawTatumCentroids := generateCentroidData(rawAnalyses)
 // 	// tatumCentroids := formatTatumCentroids(rawTatumCentroids)
 // 	tatumCentroids, err := generatePrimitiveTatumCentroids(rawAnalyses)
 
-// 	log.Println("Formatting analyses...")
+// 	logger.Println("Formatting analyses...")
 // 	analyses := formatAnalyses(rawAnalyses, tatumCentroids)
 
-// 	log.Println("Getting features...")
+// 	logger.Println("Getting features...")
 // 	rawFeatures, err := getFeatures(client, ids)
 // 	if err != nil {
 // 		return nil, err
 // 	}
 
-// 	log.Println("Formatting features...")
+// 	logger.Println("Formatting features...")
 // 	features := formatFeatures(rawFeatures)
 // 	for index, val := range features {
-// 		log.Println("Index:", index, val)
+// 		logger.Println("Index:", index, val)
 // 	}
 
 // 	if shouldWrite {
-// 		log.Println("Writing files...")
-// 		err = writeFiles("analyses.txt", "features.txt", rawAnalyses, rawFeatures)
+// 		logger.Println("Writing files...")
+// 		err = writeFiles("analyses.txt", "features.txt", "tatumCentroids.txt", rawAnalyses, rawFeatures, tatumCentroids)
 // 		if err != nil {
 // 			return nil, err
 // 		}
 // 	}
 
-// 	log.Println("Formatting genre data...")
+// 	logger.Println("Formatting genre data...")
 // 	genreData = formatData(analyses, features)
 // 	return genreData, nil
 // }
 
-// func generateDataFromFile(analysisFileName string, featureFileName string) (genreData [][]float64, err error) {
-// 	rawAnalyses, rawFeatures, err := readFiles(analysisFileName, featureFileName)
+// func generateDataFromFile(analysisFileName string, featureFileName string, tatumCentroidFileName string, shouldWrite bool) (genreData [][]float64, err error) {
+// 	rawAnalyses, rawFeatures, tatumCentroids, err := readFiles(analysisFileName, featureFileName, tatumCentroidFileName)
 // 	if err != nil {
 // 		return nil, err
 // 	}
 
-// 	tatumCentroids, err := generatePrimitiveTatumCentroids(rawAnalyses)
-// 	if err != nil {
-// 		return nil, err
-// 	}
 // 	analyses := formatAnalyses(rawAnalyses, tatumCentroids)
 // 	features := formatFeatures(rawFeatures)
 
+// 	if shouldWrite {
+// 		err = writeCentroidsFile("tatumCentroids.txt", tatumCentroids)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 	}
+
 // 	genreData = formatData(analyses, features)
 // 	return genreData, nil
 // }
-
-// func formatAnalyses(rawAnalyses []*spotify.AudioAnalysis, tatumCentroids [][]float64) (analyses [][]float64) {
-// 	for index, val := range rawAnalyses {
-// 		var analysis []float64
-// 		analysis = append(analysis, val.TrackInfo.Duration)
-// 		analysis = append(analysis, val.TrackInfo.Tempo)
-// 		analysis = append(analysis, float64(val.TrackInfo.TimeSignature)) // Might remove
-// 		analysis = append(analysis, float64(val.TrackInfo.Key))           //
-// 		analysis = append(analysis, val.TrackInfo.Loudness)
-// 		analysis = append(analysis, float64(val.TrackInfo.Mode)) //
-// 		analysis = append(analysis, tatumCentroids[index]...)
-
-// 		analyses = append(analyses, analysis)
-// 	}
-// 	return analyses
-// }
-
-// // func formatData(analyses []*spotify.AudioAnalysis, features [][]float64) (data [][]float64) {
-// // 	for index, val := range analyses {
-// // 		var datum []float64
-// // 		datum = append(datum, val.TrackInfo.Duration)
-// // 		datum = append(datum, val.TrackInfo.Tempo)
-// // 		//datum = append(datum, float64(val.TrackInfo.TimeSignature)) // Might remove
-// // 		//datum = append(datum, float64(val.TrackInfo.Key))           //
-// // 		datum = append(datum, val.TrackInfo.Loudness)
-// // 		//datum = append(datum, float64(val.TrackInfo.Mode)) //
-
-// // 		datum = append(datum, features[index]...) // Concatenate datum and features
-// // 		data = append(data, datum)
-// // 	}
-// // 	return data
-// // }
 
 // func formatData(analyses [][]float64, features [][]float64) (data [][]float64) {
 // 	for index, val := range analyses {
@@ -399,6 +399,111 @@ package csci152
 // 	return features, nil
 // }
 
+// // original
+// // func standardizeData(rawData [][]float64) [][]float64 {
+// // 	colNum := len(rawData[0])
+// // 	rowNum := len(rawData)
+// // 	normData := initializeSlice(colNum, rowNum)
+
+// // 	for i := 0; i < rowNum; i++ {
+// // 		total := 0.0
+// // 		for j := 0; j < colNum; j++ {
+// // 			total += rawData[j][i]
+// // 		}
+// // 		mean := total / float64(rowNum)
+// // 		deviation := 0.0
+// // 		var differences []float64
+// // 		for j := 0; j < colNum; j++ {
+// // 			difference := rawData[j][i] - mean
+// // 			differences = append(differences, difference)
+// // 			deviation += math.Pow(difference, 2)
+// // 		}
+// // 		stdDeviation := math.Sqrt(deviation)
+// // 		for j := 0; j < colNum; j++ {
+// // 			normData[j][i] = (differences[j]) / stdDeviation
+// // 			//normData[j][i] = (rawData[j][i] - mean) / stdDeviation // gaussian normalization equation
+// // 		}
+// // 	}
+
+// // 	return normData
+// // }
+
+// // standardizeData will transform the raw data provided into a standardized set of float64 values
+// // using gaussian normalization
+// // row/cols in loops are wrong; see goplayground code
+// func standardizeData(rawData [][]float64) [][]float64 {
+// 	rowWidth := len(rawData[0])
+// 	colHeight := len(rawData)
+// 	normData := initializeSlice(rowWidth, colHeight)
+
+// 	for i := 0; i < rowWidth; i++ {
+// 		total := 0.0
+// 		for j := 0; j < colHeight; j++ {
+// 			total += rawData[j][i]
+// 		}
+// 		mean := total / float64(colHeight)
+// 		deviation := 0.0
+// 		var differences []float64
+// 		for j := 0; j < colHeight; j++ {
+// 			difference := rawData[j][i] - mean
+// 			differences = append(differences, difference)
+// 			deviation += math.Pow(difference, 2)
+// 		}
+// 		stdDeviation := math.Sqrt(deviation)
+// 		for j := 0; j < colHeight; j++ {
+// 			normData[j][i] = (differences[j]) / stdDeviation
+// 			//normData[j][i] = (rawData[j][i] - mean) / stdDeviation // gaussian normalization equation
+// 		}
+// 	}
+
+// 	return normData
+// }
+
+// /*
+// i := [][]int{{0,1,2},{3,4,5}}
+// 	fmt.Println(i)
+// 	fmt.Println()
+// 	for _, val := range i {
+// 		fmt.Println(val)
+// 		}
+// 	//fmt.Println()
+// 	//fmt.Println(i[0])
+// 	//colNum := len(i[0])
+// 	//fmt.Println(colNum)
+// 	fmt.Println()
+// 	fmt.Println(i[0][1])
+// */
+
+// // normalizeValue performs gaussian normalization on the specified value with the provided
+// // mean and standard deviation
+// func normalizeValue(val, mean, dev float64) float64 {
+// 	return (val - mean) / dev
+// }
+
+// func initializeSlice(width int, height int) [][]float64 {
+// 	slice := make([][]float64, height)
+// 	for index := range slice {
+// 		slice[index] = make([]float64, width)
+// 	}
+// 	return slice
+// }
+
+// func formatAnalyses(rawAnalyses []*spotify.AudioAnalysis, tatumCentroids [][]float64) (analyses [][]float64) {
+// 	for index, val := range rawAnalyses {
+// 		var analysis []float64
+// 		analysis = append(analysis, val.TrackInfo.Duration)
+// 		analysis = append(analysis, val.TrackInfo.Tempo)
+// 		//analysis = append(analysis, float64(val.TrackInfo.TimeSignature)) // Might remove
+// 		//analysis = append(analysis, float64(val.TrackInfo.Key))           //
+// 		analysis = append(analysis, val.TrackInfo.Loudness)
+// 		//analysis = append(analysis, float64(val.TrackInfo.Mode)) //
+// 		analysis = append(analysis, tatumCentroids[index]...)
+
+// 		analyses = append(analyses, analysis)
+// 	}
+// 	return analyses
+// }
+
 // func formatFeatures(tracks []*spotify.AudioFeatures) (features [][]float64) {
 // 	for _, val := range tracks {
 // 		var track []float64
@@ -416,15 +521,15 @@ package csci152
 
 // func getAnalyses(client *spotify.Client, ids []spotify.ID) (analyses []*spotify.AudioAnalysis, err error) {
 // 	for index, val := range ids {
-// 		log.Println("\tGetting analysis", index, "for", val)
+// 		logger.Println("Getting analysis", index, "for", val)
 // 		analysis, err := client.GetAudioAnalysis(val)
 // 		if err != nil {
 // 			return nil, err
 // 		}
 // 		analyses = append(analyses, analysis)
-// 		log.Println("\tAnalysis successful.")
+// 		logger.Println("Analysis successful.")
 // 	}
-// 	log.Println("\tReturning analyses")
+// 	logger.Println("Returning analyses")
 
 // 	return analyses, nil
 // }
@@ -447,7 +552,7 @@ package csci152
 // 	maxOpts := spotify.Options{Limit: &hundred}
 // 	remainderOpts := spotify.Options{Limit: &remainder}
 
-// 	log.Println("Iterating through seeds")
+// 	logger.Println("Iterating through seeds")
 // 	for _, val := range seeds {
 // 		for i := 0; i < iterationsPerSeed; i++ {
 // 			newRec, err := client.GetRecommendations(val, attr, &maxOpts)
@@ -522,7 +627,7 @@ package csci152
 // 	}
 // }
 
-// func writeFiles(analysisFileName string, featureFileName string, analyses []*spotify.AudioAnalysis, features []*spotify.AudioFeatures) (err error) {
+// func writeFiles(analysisFileName, featureFileName, tatumCentroidFileName string, analyses []*spotify.AudioAnalysis, features []*spotify.AudioFeatures, tatumCentroids [][]float64) (err error) {
 // 	err = writeAnalysesFile(analysisFileName, analyses)
 // 	if err != nil {
 // 		return err
@@ -533,19 +638,29 @@ package csci152
 // 		return err
 // 	}
 
+// 	err = writeCentroidsFile(tatumCentroidFileName, tatumCentroids)
+// 	if err != nil {
+// 		return err
+// 	}
+
 // 	return nil
 // }
 
-// func readFiles(analysisFileName string, featureFileName string) (analyses []*spotify.AudioAnalysis, features []*spotify.AudioFeatures, err error) {
+// func readFiles(analysisFileName string, featureFileName string, tatumCentroidFileName string) (analyses []*spotify.AudioAnalysis, features []*spotify.AudioFeatures, tatumCentroids [][]float64, err error) {
 // 	analyses, err = readAnalysisFile(analysisFileName)
 // 	if err != nil {
-// 		return nil, nil, err
+// 		return nil, nil, nil, err
 // 	}
 // 	features, err = readFeaturesFile(featureFileName)
 // 	if err != nil {
-// 		return nil, nil, err
+// 		return nil, nil, nil, err
 // 	}
-// 	return analyses, features, nil
+// 	tatumCentroids, err = readCentroidsFile(tatumCentroidFileName)
+// 	if err != nil {
+// 		return nil, nil, nil, err
+// 	}
+
+// 	return analyses, features, tatumCentroids, nil
 // }
 
 // func readAnalysisFile(fileName string) (analyses []*spotify.AudioAnalysis, err error) {
@@ -592,6 +707,22 @@ package csci152
 // 	return features, err
 // }
 
+// func readCentroidsFile(fileName string) (centroids [][]float64, err error) {
+// 	file, err := os.Open(fileName)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer file.Close()
+
+// 	decoder := gob.NewDecoder(file)
+
+// 	err = decoder.Decode(&centroids)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return centroids, err
+// }
+
 // func writeAnalysesFile(fileName string, analyses []*spotify.AudioAnalysis) error {
 // 	file, err := os.Create(fileName)
 // 	if err != nil {
@@ -630,6 +761,21 @@ package csci152
 // 	return nil
 // }
 
+// func writeCentroidsFile(fileName string, centroids [][]float64) error {
+// 	file, err := os.Create(fileName)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer file.Close()
+
+// 	encoder := gob.NewEncoder(file)
+// 	err = encoder.Encode(centroids)
+// 	if err != nil {
+// 		return nil
+// 	}
+// 	return nil
+// }
+
 // // Network Functions
 
 // func initializeServer() (client *spotify.Client, err error) {
@@ -639,12 +785,12 @@ package csci152
 // 	// Start local HTTP Server
 // 	http.HandleFunc("/callback", completeAuth)
 // 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-// 		log.Println("Got request for:", r.URL.String())
+// 		logger.Println("Got request for:", r.URL.String())
 // 	})
 // 	go http.ListenAndServe(":8080", nil)
 
 // 	url := auth.AuthURL(state)
-// 	fmt.Println("Please log in to Spotify by visiting the following page in your browser:", url)
+// 	fmt.Println("Please logger in to Spotify by visiting the following page in your browser:", url)
 
 // 	// Block until authorization complete
 // 	client = <-ch
@@ -655,14 +801,14 @@ package csci152
 // 	tok, err := auth.Token(state, r)
 // 	if err != nil {
 // 		http.Error(w, "Couldn't get token", http.StatusForbidden)
-// 		log.Fatal(err)
+// 		logger.Fatal(err)
 // 	}
 // 	if st := r.FormValue("state"); st != state {
 // 		http.NotFound(w, r)
-// 		log.Fatalf("State mismatch: %s != %s\n", st, state)
+// 		logger.Fatalf("State mismatch: %s != %s\n", st, state)
 // 	}
 // 	// Retrieve authenticated client using token
 // 	client := auth.NewClient(tok)
-// 	fmt.Fprintf(w, "Login Completed!")
+// 	fmt.Fprintf(w, "log Completed!")
 // 	ch <- &client
 // }
