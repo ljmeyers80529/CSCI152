@@ -13,13 +13,13 @@ func init() {
 	setUserDefault()
 	http.Handle("/favicon.ico", http.NotFoundHandler()) // ignore favicon request (error 404)
 	http.HandleFunc("/", pageMain)                      // index page to check if already logged in or need to login.
-	http.HandleFunc("/login", pageLogin)
-	http.HandleFunc("/logout", pageLogout)
-	http.HandleFunc("/register", pageRegister)
+	// http.HandleFunc("/login", pageLogin)
+	// http.HandleFunc("/logout", pageLogout)
+	// http.HandleFunc("/register", pageRegister)
 	http.HandleFunc("/home", pageHome)
-	http.HandleFunc("/username/check", pageRegisterUsernameCheck) // verify username is unique.
-	http.HandleFunc("/about", pageAbout)                          // about web page.
-	http.HandleFunc("/playlist", loadPlayLists)
+	// http.HandleFunc("/username/check", pageRegisterUsernameCheck) // verify username is unique.
+	// http.HandleFunc("/about", pageAbout)                          // about web page.
+	// http.HandleFunc("/playlist", loadPlayLists)
 	//
 	http.HandleFunc("/callback", completeAuthentication)
 

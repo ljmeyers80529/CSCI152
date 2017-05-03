@@ -1,32 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- For all documents decide between using 'id' and 'class'-->
+
+<head>
+    <title>TasteTest</title>
+    <link rel="stylesheet" type="text/css" href="../css/main.css">
+</head>
+
+<header>
+    <a href="homepage.html"><img src="../img/test1nobg.png" id="navlogo"></a>
+    <div class="nav">
+        <ul>
+            <li><a href="homepage.html">HOME</a></li>
+            <li><a href="about.html">ABOUT</a></li>
+            {{if not .User.LoggedIn}}
+            <li>
+                <p><input type="text" name="username" placeholder="Username" autofocus>
+                    <input type="password" name="password" value="" placeholder="Password">
+                    <input type="submit" name="cmdbutton" value="Login"></p>
+            </li>
+            {{else}}
+            <li class="dropdown">
+                <a href="#drop">{{.Username}}</a>
+                <div class="dropdown-content">
+                    <a href="#">Settings</a>
+                    <a href="#">Signout</a>
+                </div>
+            </li>
+            {{end}}
+        </ul>
+    </div>
+</header>
 
 <body>
-
-    <!-- Eventually turn this into a header file-->
-    <div id="nav">
-        <ul>
-            <li><a href="#home">HOME</a></li>
-            <li><a href="#login">LOGIN</a></li>
-            <li><a href="#register">REGISTER</a></li>
-            <li><a href="#about">ABOUT</a></li>
-            <li><a href="/logout">Logout</a></li>
-            <li><a href="/playlist">Load Playlist</a></li>
-        </ul>
-    </div>
-
-    <div id="homepage">
-        <h1>Taste Taste</h1>
-        <p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
-        <p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
-    </div>
-
-    <div id="endnav">
-        <ul>
-            <!-- Maybe add our info here or something-->
-            <li><a href="#backtotop">BACK TO TOP</a></li>
-        </ul>
-    </div>
-
+    <h1>Tast test 1</h1>
 </body>
