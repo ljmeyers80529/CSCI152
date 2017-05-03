@@ -1,230 +1,284 @@
-text.detail { color:#FFFFFF }
+/*changes to body done here, default stuff,*/
 
-html, body, #atf, #btf, #nav{
-    padding: 0;
+body {
     margin: 0;
-    border:0;
-    height: 100%;
-    /*  box-sizing: border-box*/;
-    font-family: 'Open Sans', sans-serif;
-}
-
-body{
-    background-color: white;
-}
-
-a{
+    background: #222;
+    /*body background color*/
+    font-family: sans-serif;
     color: white;
+    font-weight: 400;
+    /*changes thickness of font*/
 }
 
-#MainLogo img{
-    position: relative;
-    width: 25%;
-    height: 25%;
-    top:0;
-    left:40%;
-    bottom: 0;
 
+/*header is a heade, meant for head stuff*/
+
+header {
+    width: 100%;
+    /*take 100% width of page */
+    position: fixed;
+    /*keep header in place as you scroll*/
+    background: #1ED760;
+    /*change color of header*/
+    top: 0px;
+    /*star at 0 position from top */
+    opacity: .7;
+    /*trasperency*/
 }
 
-#s{
-    width:400px;
+
+/*fucks wit logo on nav bar */
+
+#navlogo {
+    float: left;
+    height: 50px;
+    width: 50px;
 }
 
-#down{
 
-    border-collapse: collapse;
-    border: 1px solid black;
-    font-family: fantasy;
-    width:50%;
+/*pushes stuff to right side of nav bar, unless told otherwise (logocase)*/
+
+.nav {
+    float: right;
 }
 
-#nav {
-    /*position: fixed;*/
-    top: 0;
-    min-width: 100%;
-    height: 75px;
-    border-bottom: 1px inset black;
-    font-family: Impact, Charcoal, sans-serif;
-    font-size: 24px;
-    display: flex;
-    align-items: center;
-    background-color:  #193154;
-}
 
-#nav h1{
-    color: white;
-}
-body{
-    color: black;
-}
+/*messes with list in general*/
 
-#nav ul{
+.nav ul {
+    margin: 0;
+    /*no space around it, important for positioning of list */
+    margin-right: 40px;
+    /*shifting whole list a tad bit to the left*/
     list-style: none;
-    padding:0;
-    display: flex;
-    flex-direction:row;
-    justify-content:flex-end;
-    width:100%;
-}
-
-#nav ul li{
-    margin-right: 10px;
-    display: block;
-    text-align:right;
-    font-family: Impact, Charcoal, sans-serif;
-}
-
-@import url(http://fonts.googleapis.com/css?family=Roboto:400);
-
-.container {
-    padding: 25px;
-    position: fixed;
-}
-
-.form-login {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  width:50%;
-  height: auto;
-  font-size: 16px;
-  background-image: url('searchicon.png');
-  background-position: center;
-  background-repeat: no-repeat;
-  /* padding: 12px 20px 12px 40px;*/
-  -webkit-transition: width 0.4s ease-in-out;
-  transition: width 0.4s ease-in-out;
-}
-
-h4 {
-    border:0 solid #fff;
-    border-bottom-width:1px;
-    padding-bottom:10px;
-    text-align: center;
-}
-
-.form-control {
-    border-radius: 10px;
-}
-
-.wrapper {
-    text-align: center;
+    /*take off default list bullet points/underlining*/
 }
 
 
+/*messes with whats inside of list*/
 
-/*----------------------------------Media Queries------------------------------------------------------*/
-
-@media screen and (max-width:1000px){
-    #nav img{
-        display: none;
-    }
-
-    #nav{
-        width:auto;
-    }
-
-    #MainLogo{
-        justify-content: center;
-    }
-}
-
-
-@media screen and (max-width:800px){
-    #nav ul{
-
-        align-content: center;
-        justify-content: center;
-    }
-    #nav h1{
-        display: none;
-    }
-}
-
-@media screen and (max-width:700px) {
-    #MainLogo{
-        margin-left: auto;
-        margin-right: auto;
-    }
-}
-
-@media screen and (max-height: 500px){
-    #MainLogo img{
-        display:none;
-    }
-}
-
-@media screen and (max-height: 320px){
-    #nav ul{
-        font-size: 20px;
-    }
-}
-
-/**************************************************  modal pop-up  **************************************************/
-
-.modalDialog {
-    position: fixed;
-	font-family: Arial, Helvetica, sans-serif;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	left: 0;
-	background: rgba(0,0,0,0.8);
-	z-index: 99999;
-	opacity: 0;
-	-webkit-transition: opacity 400ms ease-in;
-	-moz-transition: opacity 400ms ease-in;
-	transition: opacity 400ms ease-in;
-	pointer-events: none;
-}
-
-.modalDialog:target {
-	opacity: 1;
-	pointer-events: auto;
-}
-
-.modalDialog > div {
-    width: 400px;
+.nav li {
+    display: inline-block;
+    /*puts list items in a row, instead of column */
+    margin-left: 50px;
+    /*spacing between list items */
+    padding-top: 15px;
+    /*pushes items in list a bit down, not so close to top of page*/
     position: relative;
-    margin: 10% auto;
-    padding: 5px 20px 13px 20px;
-    border-radius: 10px;
-    background: #008000;
-    background: -webkit-linear-gradient(#fff, #999);
-    background: -o-linear-gradient(#fff, #999);
-    background: linear-gradient(#fff, #999);
-
 }
 
-.close {
-	background: #606061;
-	color: #FFFFFF;
-	line-height: 25px;
-	position: absolute;
-	right: -12px;
-	text-align: center;
-	top: -10px;
-	width: 24px;
-	text-decoration: none;
-	font-weight: bold;
-	-webkit-border-radius: 12px;
-	-moz-border-radius: 12px;
-	border-radius: 12px;
-	-moz-box-shadow: 1px 1px 3px #000;
-	-webkit-box-shadow: 1px 1px 3px #000;
-	box-shadow: 1px 1px 3px #000;
+.nav a::before {
+    content: '';
+    display: block;
+    height: 5px;
+    background-color: #FFFFFF;
+    position: absolute;
+    top: 35px;
+    width: 0%;
+    -webkit-transition: ease-in-out 250ms;
 }
 
-.close:hover { background: #00d9ff; }
-
-/**************************************************  page resolutions  **************************************************/
-
-h6, h5 {
-    padding: 0px;
-    margin: 5px;
+.nav a:hover::before {
+    /*goes along with code right above, sets width of animated underline*/
+    width: 100%;
 }
 
-h5 > a {
-    color: darkblue;
+.nav a {
+    /*messes with text on nav*/
+    color: #000000;
+    text-decoration: none;
+    font-family: "Eras Bold ITC";
+}
+
+
+/*color when hovering over text on nav*/
+
+.nav a:hover {
+    color: rgba(0, 0, 0, 0.65);
+}
+
+
+/*start homepage section 70px from the top*/
+
+.homepage {
+    margin-top: 70px;
+}
+
+#login {
+    margin-top: 70px;
+}
+
+#register {
+    margin-top: 70px;
+}
+
+
+/*centering text to center of page*/
+
+.homepage {
+    text-align: center;
+}
+
+
+/*messes with big logo on hompage*/
+
+.homepage img {
+    align-content: center;
+    width: 30%;
+    height: 30%;
+}
+
+.dropdown-content {
+    /*opacity: .9;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+*/
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    z-index: 1;
+}
+
+.dropdown-content a::before {
+    content: '';
+    display: block;
+    height: 5px;
+    background-color: #444;
+    position: relative;
+    top: 30px;
+    width: 0%;
+    -webkit-transition: ease-in-out 250ms;
+}
+
+.dropdown-content a {
+    color: #000;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+#atf {
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+    background: url("../img/HeadphoneHomepage1.jpg") no-repeat center center;
+    background-size: cover;
+}
+
+#btf {
+    display: flex;
+    flex-direction: row;
+}
+
+#btf2 {
+    background: url("../img/btf1.jpg") no-repeat center center;
+    background-size: cover;
+}
+
+#container1,
+#container3 {
+    text-align: center;
+    float: left;
+    width: 40%;
+    padding: 10px;
+}
+
+#container2,
+#container4 {
+    text-align: center;
+    float: right;
+    width: 40%;
+    padding: 10px;
+    margin-left: 100px;
+}
+
+
+/*
+#container2{
+    float: right;
+    width: 33.3%;    padding: 8px;
+}\ No newline at end of file
+
+*/
+
+#player {
+    float: right;
+}
+
+#playerLogIn {
+    float: left;
+    width: 75%;
+    background: url("../img/HeadphoneHomepage1.jpg");
+    background-size: cover;
+}
+
+#radar {
+    display: inline-block;
+    width: 25%;
+    background: url("../img/loginbg.jpg");
+    background-size: cover;
+}
+
+#grad1 {
+    height: 70px;
+    background: black;
+    /* For browsers that do not support gradients */
+    background: linear-gradient(black, #575757);
+    /* Standard syntax (must be last) */
+}
+
+#th {
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+    /*background: url("../img/HeadphoneHomepage1.jpg") no-repeat center center;*/
+    /*background-size: cover;*/
+}
+
+#grad2 {
+    height: 78px;
+    background: #575757;
+    background: linear-gradient(#575757, black);
+}
+
+#footer {
+    position: fixed;
+    height: 3px;
+    background-color: darkred;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    margin-bottom: 0px;
+}
+
+#content {
+    text-align: right;
+    float: right;
+    width: 75%;
+}
+
+#login {
+    display: inline-block;
+    width: 25%;
+    background: url("../img/loginbg.jpg");
+    background-size: cover;
+}
+
+#th {
+    display: inline-block;
+    width: 100%;
+    background: url("../img/btf1.jpg")fixed;
+    background-size: cover;
+}
+
+#bf {
+    display: inline-block;
+    width: 100%;
+    background: url("../img/test4.jpg")fixed;
+    background-size: cover;
 }
