@@ -26,8 +26,8 @@ func completeAuthentication(res http.ResponseWriter, req *http.Request) {
 }
 
 func initSpotify(res http.ResponseWriter, req *http.Request) {
-	ctx := appengine.NewContext(req)
-	log.Infof(ctx, "Spot login state: %v", webInformation.User.SpotLogged)
+	// ctx := appengine.NewContext(req)
+	// log.Infof(ctx, "Spot login state: %v", webInformation.User.SpotLogged)
 	if !webInformation.User.SpotLogged {
 		auth = spotify.NewAuthenticator(retrieveURI, spotify.ScopeUserReadRecentlyPlayed)
 		auth.SetAuthInfo(clientID, spotKey)
@@ -38,6 +38,12 @@ func initSpotify(res http.ResponseWriter, req *http.Request) {
 // check if client object has been defined; returns true if Ok..
 func clientOK() bool {
 	return !(spotClient == spotify.Client{})
+}
+
+// get spotify username.
+func spotifyUser() string {
+	user, _ := spotClient.CurrentUser()
+	return user.ID
 }
 
 func loadPlayLists(res http.ResponseWriter, req *http.Request) {
