@@ -256,13 +256,13 @@ header {
     margin-bottom: 0px;
 }
 
-#content {
+content {
     text-align: right;
     float: right;
     width: 75%;
 }
 
-#login {
+login {
     display: inline-block;
     width: 25%;
     background: url("../img/loginbg.jpg");

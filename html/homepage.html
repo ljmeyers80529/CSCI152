@@ -20,6 +20,7 @@
                         <input type="submit" name="cmdbutton" value="Login"></p>
                 </li>
                 {{else}}
+                <h4>{{.User.Username}}</h4>
                 <li class="dropdown">
                     <a href="#drop">{{.Username}}</a>
                     <div class="dropdown-content">
@@ -125,7 +126,7 @@
         {{else}}
 
         <div id="playerLogIn">
-            <iframe src="https://embed.spotify.com/?uri=spotify:user:spotify:playlist:{{.userPlaylistID}}" width="720" height="640" frameborder="0"></iframe>
+            <iframe src="https://embed.spotify.com/?uri=spotify:user:spotify:playlist:{{.UserPlaylistID}}" width="720" height="640" frameborder="0"></iframe>
             <!-- 
             Add in the radar chart here.
         -->

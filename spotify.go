@@ -42,8 +42,17 @@ func clientOK() bool {
 
 // get spotify username.
 func spotifyUser() string {
-	user, _ := spotClient.CurrentUser()
-	return user.ID
+	var user = "ZZZZZ"
+
+	if clientOK() {
+		cu, err := spotClient.CurrentUser()
+		if err == nil {
+			user = cu.ID
+		} else {
+			user = ""
+		}
+	}
+	return user
 }
 
 func loadPlayLists(res http.ResponseWriter, req *http.Request) {
