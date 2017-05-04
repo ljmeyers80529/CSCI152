@@ -31,9 +31,9 @@ package csci152
 // 	root            = "https://api.spotify.com/v1/"
 // 	authroot        = "https://accounts.spotify.com/authorize"
 // 	dataPerGenreNum = 300 // 500 breaks something; using 300 for standard
-// 	iterationNum    = 2500
-// 	confidenceNum   = 0.35
-// 	extraNodesNum   = 50
+// 	iterationNum    = 1000
+// 	confidenceNum   = 0.50
+// 	extraNodesNum   = 5
 // 	testDataSizeNum = 10
 // )
 
@@ -123,7 +123,7 @@ package csci152
 // 	//network := gonn.NewNetwork(dataElementCount, hiddenCount, genreCount, false, 0.01, 0.001) // This is working sort of because of the false regression
 // 	//network := gonn.NewNetwork(dataElementCount, hiddenCount, genreCount, true, 0.0001, 0.00001) // Might be overfitting
 // 	//network := gonn.NewNetwork(dataElementCount, hiddenCount, genreCount, true, 0.0005, 0.00005) // This seems to only rarely get bad results, best so far
-// 	network := gonn.NewNetwork(dataElementCount, hiddenCount, genreCount, true, 0.0005, 0.00005)
+// 	network := gonn.NewNetwork(dataElementCount, hiddenCount, genreCount, true, 0.001, 0.0001)
 // 	targetData := generateTargetData(genreCount, dataPerGenre)
 
 // 	// Debugging code
@@ -230,8 +230,73 @@ package csci152
 
 // // just input all the timbres or maybe a set of the timbres into the kmeans algorithm
 // func generatePrimitiveTimbreCentroids(analyses []*spotify.AudioAnalysis) (timbreCentroids [][]float64, err error) {
+// 	timbreNodes := generateTimbreNodes(analyses)
+// 	timbreCentroids, err = generateGenericCentroids(timbreNodes)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
 // 	return timbreCentroids, nil
+// 	// for index, val := range timbreNodes {
+// 	// 	success, rawCentroids := gokmeans.Train(val, 5, 20)
+// 	// 	if !success {
+// 	// 		err = errors.New("centroid training has failed")
+// 	// 		return nil, err
+// 	// 	}
+// 	// 	logger.Println("Success!, Displaying centroids for track ", index)
+// 	// 	for _, centroid := range rawCentroids {
+// 	// 		logger.Println(centroid)
+// 	// 	}
+// 	// 	var centroids []float64
+// 	// 	for _, rawNode := range rawCentroids {
+// 	// 		centroids = append(centroids, rawNode...)
+// 	// 		// for _, rawFloat := range rawNode {
+// 	// 		// 	centroids = append(centroids, rawFloat)
+// 	// 		// }
+// 	// 	}
+// 	// 	timbreCentroids = append(timbreCentroids, centroids)
+// 	// }
+// 	// return timbreCentroids, nil
+// }
+
+// func generateGenericCentroids(nodes [][]gokmeans.Node) (centroids [][]float64, err error) {
+// 	for index, val := range nodes {
+// 		success, rawCentroids := gokmeans.Train(val, 5, 20)
+// 		if !success {
+// 			err = errors.New("centroid training has failed")
+// 			return nil, err
+// 		}
+// 		logger.Println("Success!, Displaying centroids for track ", index)
+// 		for _, c := range rawCentroids {
+// 			logger.Println(c)
+// 		}
+// 		var floats []float64
+// 		for _, rawNode := range rawCentroids {
+// 			floats = append(floats, rawNode...)
+// 			// for _, rawFloat := range rawNode {
+// 			// 	centroids = append(centroids, rawFloat)
+// 			// }
+// 		}
+// 		centroids = append(centroids, floats)
+// 	}
+
+// 	return centroids, err
+// }
+
+// func generateTimbreNodes(analyses []*spotify.AudioAnalysis) (timbreNodes [][]gokmeans.Node) {
+// 	for index, val := range analyses {
+// 		mod := index % 10
+// 		if mod == 0 || mod == 5 {
+// 			var nodes []gokmeans.Node
+// 			for _, segment := range val.Segments {
+// 				var tempNode gokmeans.Node
+// 				tempNode = segment.Timbre
+// 				nodes = append(nodes, tempNode)
+// 			}
+// 			timbreNodes = append(timbreNodes, nodes)
+// 		}
+// 	}
+// 	return timbreNodes
 // }
 
 // func generatePrimitiveTatumCentroids(analyses []*spotify.AudioAnalysis) (tatumCentroids [][]float64, err error) {
@@ -277,6 +342,9 @@ package csci152
 // 	for i := 0; i < total; i++ {
 // 		key := i / dataPerGenre
 // 		target := make([]float64, genreCount)
+// 		// for index := range target {
+// 		// 	target[index] = -1
+// 		// }
 // 		target[key] = 1
 // 		targets = append(targets, target)
 // 	}
