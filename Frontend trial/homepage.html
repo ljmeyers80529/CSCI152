@@ -11,7 +11,7 @@
         <ul>
             <li><a href="homepage.html">HOME</a></li>
             <li><a href="about.html">ABOUT</a></li>
-            {{if !.User.LoggedIn}}
+            {{if not.User.LoggedIn}}
             <li><p><input type="text" name="username" placeholder="Username" autofocus>
                    <input type="password" name="password" value="" placeholder="Password">
                    <class="submit"><input type="submit" name="cmdbutton" value="Login"></p></li>
@@ -30,7 +30,7 @@
 
 <body>
 	<div id = "atf">
-	{{if !.User.LoggedIn}}
+	{{if not.User.LoggedIn}}
 		<content>			
 			<div class="homepage">
 				<img src="img/test1.jpg">
@@ -95,20 +95,15 @@
         
         <div id="bf">
             <div id="container2">
-                <h1>Taste Taste</h1>
-                <img src="img/test1.jpg">
-                <p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
-                <p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
-                <p>TESTING NAV BAR FIXED POSITION</p>
-                <p>TESTING NAV BAR FIXED POSITION</p>
-                <p>TESTING NAV BAR FIXED POSITION</p>
+                <h1>Sample Radar Graph</h1>
+                <canvas id="radarChart" height="600" width="600"></canvas>
+                <script src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+                <script src ="js/main.js"></script>
             </div>
 
             <div id = "btf2">
                 <div id="container3">
-                    <h1>Taste Taste</h1>
-                    <img src="img/taste.jpeg" width = "300" height="300">
-                    <p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
+                    <p>This is a sample graph that will illustrate the metrics of song displaying the genres the song can be associated with .</p>
                     <p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
                     <p>TESTING NAV BAR FIXED POSITION</p>
                     <p>TESTING NAV BAR FIXED POSITION</p>
@@ -132,7 +127,7 @@
     </div>
     <div id = "radar">
         <h1>Radar Graph</h1>
-        <canvas id="radarChart" height="600" width="600"></canvas>
+        <canvas id="radarChart2" height="600" width="600"></canvas>
         <script src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
         <script src ="js/main.js"></script>
     </div>
