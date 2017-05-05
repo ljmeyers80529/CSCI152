@@ -25,16 +25,19 @@ package csci152
 // )
 
 // const (
-// 	redirectURI     = "http://localhost:8080/callback"
-// 	testID          = "80c614680ee64001a9fe3f5d98880364"
-// 	testSecret      = "a3790222803a4f8fbdd5cdd5a2ce64d9"
-// 	root            = "https://api.spotify.com/v1/"
-// 	authroot        = "https://accounts.spotify.com/authorize"
-// 	dataPerGenreNum = 300 // 500 breaks something; using 300 for standard
-// 	iterationNum    = 1000
-// 	confidenceNum   = 0.50
-// 	extraNodesNum   = 5
-// 	testDataSizeNum = 10
+// 	redirectURI         = "http://localhost:8080/callback"
+// 	testID              = "80c614680ee64001a9fe3f5d98880364"
+// 	testSecret          = "a3790222803a4f8fbdd5cdd5a2ce64d9"
+// 	root                = "https://api.spotify.com/v1/"
+// 	authroot            = "https://accounts.spotify.com/authorize"
+// 	dataPerGenreNum     = 300 // 500 breaks something; using 300 for standard
+// 	iterationNum        = 1000
+// 	confidenceNum       = 0.50
+// 	extraNodesNum       = 5
+// 	testDataSizeNum     = 10
+// 	singletonNum        = 3
+// 	setNum              = 5
+// 	kmeansIterationsNum = 20
 // )
 
 // var (
@@ -43,19 +46,14 @@ package csci152
 // 	state = "abc123"
 // )
 
-// // Centroid holds the slice of slices of node data for different input data
-// type Centroid struct {
-// 	Tatums [][]gokmeans.Node
-// }
-
 // var logger *log.Logger
 
 // // Command line arguments are as follows:
 // // -network : Explicitly use network to generate genre data
 // // -test : Run a neural network test using small test cases generated using network
 // // -write : Write the analysis data to disk
-// // Default: Use local training data from files on disk, don't run test, don't write new files
-
+// // -kmeans : Calculate kmeans instead of reading from file
+// // Default: Use local training data and kmeans from files on disk, don't run test, don't write new files
 // func main() {
 // 	logf, err := os.OpenFile("log.txt", os.O_WRONLY|os.O_CREATE, 0640)
 // 	if err != nil {
@@ -64,8 +62,9 @@ package csci152
 // 	log.SetOutput(logf)
 // 	logger = log.New(io.MultiWriter(logf, os.Stdout), "logger:", log.LstdFlags)
 // 	startTime := time.Now()
+
 // 	// Get command-line arguments
-// 	argList := []string{"-network", "-test", "-write", "-standardize"}
+// 	argList := []string{"-network", "-test", "-write", "-standardize", "-kmeans"}
 // 	args := initializeArgMap(argList)
 // 	resolveCommandArgs(args)
 
@@ -75,6 +74,9 @@ package csci152
 // 	extraNodes := extraNodesNum
 // 	iterations := iterationNum
 // 	testDataSize := testDataSizeNum
+// 	singletonCount := singletonNum
+// 	setCount := setNum
+// 	kmeansIterations := kmeansIterationsNum
 
 // 	// Initialize genre variables
 // 	genres := []string{"classical", "pop", "rock", "electronic"}
@@ -93,15 +95,16 @@ package csci152
 
 // 		// Generate training data from endpoints
 // 		logger.Println("Generating genre data...")
-// 		trainingData, err = generateGenreData(client, genres, dataPerGenre, args["-write"])
+// 		trainingData, err = generateGenreData(client, genres, dataPerGenre, args["-write"], singletonCount, setCount, kmeansIterations)
 // 		if err != nil {
 // 			logger.Println(err)
 // 			return
 // 		}
 // 	} else {
 // 		// Generate training data from file
+// 		//fileList := []string{"analyses.txt", "features.txt", "tatumCentroids"}
 // 		logger.Println("Reading genre data...")
-// 		trainingData, err = generateDataFromFile("analyses.txt", "features.txt", "tatumCentroids.txt", args["-write"])
+// 		trainingData, err = generateDataFromFile("analyses.txt", "features.txt", "centroids.txt", args["-write"], args["-kmeans"], singletonCount, setCount, kmeansIterations)
 // 		if err != nil {
 // 			logger.Println(err)
 // 			return
@@ -153,7 +156,7 @@ package csci152
 // 			}
 // 		}
 
-// 		testingData, err := generateGenreData(client, genres, testDataSize, false) // Never write test data to file
+// 		testingData, err := generateGenreData(client, genres, testDataSize, false, singletonCount, setCount, kmeansIterations)
 // 		if err != nil {
 // 			logger.Println(err)
 // 			return
@@ -192,90 +195,63 @@ package csci152
 
 // // Data Generation
 
-// func formatRawCentroids(rawCentroids [][]gokmeans.Node) (centroids [][]float64) {
-// 	for _, val := range rawCentroids {
-// 		singleCentroid := val[0]
-// 		centroids = append(centroids, singleCentroid)
+// func generateCentroids(analyses []*spotify.AudioAnalysis, singletonClusterCount, setClusterCount, algoIterations int) (rawCentroids [][][]float64, err error) {
+// 	logger.Println("Generating centroids...")
+// 	tatumNodes := generateTatumNodes(analyses)
+// 	tatumCentroids, err := generateGenericCentroids(tatumNodes, singletonClusterCount, algoIterations)
+// 	if err != nil {
+// 		return nil, err
 // 	}
+// 	rawCentroids = append(rawCentroids, tatumCentroids)
 
+// 	timbreNodes := generateTimbreNodes(analyses)
+// 	timbreCentroids, err := generateGenericCentroids(timbreNodes, setClusterCount, algoIterations)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	rawCentroids = append(rawCentroids, timbreCentroids)
+
+// 	pitchNodes := generatePitchNodes(analyses)
+// 	pitchCentroids, err := generateGenericCentroids(pitchNodes, setClusterCount, algoIterations)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	rawCentroids = append(rawCentroids, pitchCentroids)
+
+// 	return rawCentroids, nil
+// }
+
+// func formatCentroids(rawCentroids [][][]float64) [][]float64 {
+// 	logger.Println("Formatting centroids...")
+
+// 	height := len(rawCentroids[0])
+// 	centroids := initializeSlice(0, height)
+
+// 	for index := range centroids {
+// 		for _, val := range rawCentroids {
+// 			centroids[index] = append(centroids[index], val[index]...)
+// 		}
+// 	}
 // 	return centroids
 // }
 
-// func generateCentroidData(analyses []*spotify.AudioAnalysis) (tatumCentroids [][]gokmeans.Node, err error) {
-// 	tatumCentroids, err = generateRawTatumCentroids(analyses)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	return tatumCentroids, nil
-// }
-
-// func generateRawTatumCentroids(analyses []*spotify.AudioAnalysis) (rawTatumCentroids [][]gokmeans.Node, err error) {
-// 	tatumNodes := generateTatumNodes(analyses)
-// 	for _, val := range tatumNodes {
-// 		success, rawCentroids := gokmeans.Train(val, 2, 25)
-// 		if !success {
-// 			err = errors.New("centroid training has failed")
-// 			return nil, err
-// 		}
-// 		logger.Println("Success!\nDisplaying centroids")
-// 		for _, centroid := range rawCentroids {
-// 			logger.Println(centroid)
-// 		}
-// 		rawTatumCentroids = append(rawTatumCentroids, rawCentroids)
-// 	}
-
-// 	return rawTatumCentroids, nil
-// }
-
-// // just input all the timbres or maybe a set of the timbres into the kmeans algorithm
-// func generatePrimitiveTimbreCentroids(analyses []*spotify.AudioAnalysis) (timbreCentroids [][]float64, err error) {
-// 	timbreNodes := generateTimbreNodes(analyses)
-// 	timbreCentroids, err = generateGenericCentroids(timbreNodes)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	return timbreCentroids, nil
-// 	// for index, val := range timbreNodes {
-// 	// 	success, rawCentroids := gokmeans.Train(val, 5, 20)
-// 	// 	if !success {
-// 	// 		err = errors.New("centroid training has failed")
-// 	// 		return nil, err
-// 	// 	}
-// 	// 	logger.Println("Success!, Displaying centroids for track ", index)
-// 	// 	for _, centroid := range rawCentroids {
-// 	// 		logger.Println(centroid)
-// 	// 	}
-// 	// 	var centroids []float64
-// 	// 	for _, rawNode := range rawCentroids {
-// 	// 		centroids = append(centroids, rawNode...)
-// 	// 		// for _, rawFloat := range rawNode {
-// 	// 		// 	centroids = append(centroids, rawFloat)
-// 	// 		// }
-// 	// 	}
-// 	// 	timbreCentroids = append(timbreCentroids, centroids)
-// 	// }
-// 	// return timbreCentroids, nil
-// }
-
-// func generateGenericCentroids(nodes [][]gokmeans.Node) (centroids [][]float64, err error) {
+// // generateGenericCentroids takes a 2D slice of kmeans nodes and runs the kmeans algorithm on each slice of nodes,
+// // for a set amount of round denoted by the iterations variable, yielding the specified amount of centroid clusters
+// // denoted by clusterCount.
+// func generateGenericCentroids(nodes [][]gokmeans.Node, clusterCount int, iterations int) (centroids [][]float64, err error) {
 // 	for index, val := range nodes {
-// 		success, rawCentroids := gokmeans.Train(val, 5, 20)
+// 		success, rawCentroids := gokmeans.Train(val, clusterCount, iterations)
 // 		if !success {
 // 			err = errors.New("centroid training has failed")
 // 			return nil, err
 // 		}
-// 		logger.Println("Success!, Displaying centroids for track ", index)
+// 		logger.Println("Success! Displaying centroids for track ", index)
 // 		for _, c := range rawCentroids {
 // 			logger.Println(c)
 // 		}
 // 		var floats []float64
 // 		for _, rawNode := range rawCentroids {
 // 			floats = append(floats, rawNode...)
-// 			// for _, rawFloat := range rawNode {
-// 			// 	centroids = append(centroids, rawFloat)
-// 			// }
 // 		}
 // 		centroids = append(centroids, floats)
 // 	}
@@ -283,47 +259,8 @@ package csci152
 // 	return centroids, err
 // }
 
-// func generateTimbreNodes(analyses []*spotify.AudioAnalysis) (timbreNodes [][]gokmeans.Node) {
-// 	for index, val := range analyses {
-// 		mod := index % 10
-// 		if mod == 0 || mod == 5 {
-// 			var nodes []gokmeans.Node
-// 			for _, segment := range val.Segments {
-// 				var tempNode gokmeans.Node
-// 				tempNode = segment.Timbre
-// 				nodes = append(nodes, tempNode)
-// 			}
-// 			timbreNodes = append(timbreNodes, nodes)
-// 		}
-// 	}
-// 	return timbreNodes
-// }
-
-// func generatePrimitiveTatumCentroids(analyses []*spotify.AudioAnalysis) (tatumCentroids [][]float64, err error) {
-// 	tatumNodes := generateTatumNodes(analyses)
-// 	for index, val := range tatumNodes {
-// 		success, rawCentroids := gokmeans.Train(val, 3, 15)
-// 		if !success {
-// 			err = errors.New("centroid training has failed")
-// 			return nil, err
-// 		}
-// 		logger.Println("Success! Displaying centroids for track ", index)
-// 		for _, centroid := range rawCentroids {
-// 			logger.Println(centroid)
-// 		}
-// 		var centroids []float64
-// 		// Loop through the current slice of nodes and extract the underlying floats from each
-// 		for _, rawNode := range rawCentroids {
-// 			underlyingFloat := []float64(rawNode)[0]
-// 			centroids = append(centroids, underlyingFloat)
-// 		}
-
-// 		tatumCentroids = append(tatumCentroids, centroids)
-// 	}
-
-// 	return tatumCentroids, nil
-// }
-
+// // generateTatumNodes parses the provided list of analysis objects and extracts that tatum data
+// // for each track as a slice of slices of kmeans nodes.
 // func generateTatumNodes(analyses []*spotify.AudioAnalysis) (tatumNodes [][]gokmeans.Node) {
 // 	for _, val := range analyses {
 // 		var nodes []gokmeans.Node
@@ -336,6 +273,45 @@ package csci152
 // 	return tatumNodes
 // }
 
+// // generateTimbreNodes parses the provided list of analysis objects and extracts a sample of the timbre data
+// // for each track as a slice of slices of kmeans nodes.
+// func generateTimbreNodes(analyses []*spotify.AudioAnalysis) (timbreNodes [][]gokmeans.Node) {
+// 	for _, val := range analyses {
+// 		var nodes []gokmeans.Node
+// 		for index, segment := range val.Segments {
+// 			mod := index % 10
+// 			if mod == 0 || mod == 5 {
+// 				var tempNode gokmeans.Node
+// 				tempNode = segment.Timbre
+// 				nodes = append(nodes, tempNode)
+// 			}
+// 		}
+// 		timbreNodes = append(timbreNodes, nodes)
+// 	}
+// 	return timbreNodes
+// }
+
+// // generatePitchNodes parses the provided list of analysis objects and extracts a sample of the timbre data
+// // for each track as a slice of slices of kmeans nodes.
+// func generatePitchNodes(analyses []*spotify.AudioAnalysis) (pitchNodes [][]gokmeans.Node) {
+// 	for _, val := range analyses {
+// 		var nodes []gokmeans.Node
+// 		for index, segment := range val.Segments {
+// 			mod := index % 10
+// 			if mod == 0 || mod == 5 {
+// 				var tempNode gokmeans.Node
+// 				tempNode = segment.Pitches
+// 				nodes = append(nodes, tempNode)
+// 			}
+// 		}
+// 		pitchNodes = append(pitchNodes, nodes)
+// 	}
+// 	return pitchNodes
+// }
+
+// // generateTargetData takes the amount of genres and the data needed per genre
+// // then returns a slice of slices of float64s that denote the target data for the given
+// // parameters
 // func generateTargetData(genreCount int, dataPerGenre int) (targets [][]float64) {
 // 	total := genreCount * dataPerGenre
 
@@ -351,74 +327,71 @@ package csci152
 
 // 	return targets
 // }
+// func generateGenreData(client *spotify.Client, genres []string, dataPerGenre int, shouldWrite bool, singleCount, setCount, iterations int) (genreData [][]float64, err error) {
+// 	seeds := getSeeds(genres)
 
-// func generateGenreData(client *spotify.Client, genres []string, dataPerGenre int, shouldWrite bool) (genreData [][]float64, err error) {
-// 	seeds := formatSeeds(genres)
-
-// 	logger.Println("Generating recommendations...")
 // 	recs, err := generateRecommendations(client, seeds, dataPerGenre)
 // 	if err != nil {
 // 		return nil, err
 // 	}
 
-// 	logger.Println("Getting ID's...")
 // 	ids := getIDs(recs)
-// 	logger.Println(ids)
-// 	logger.Println(len(ids))
 
-// 	logger.Println("Getting analyses...")
 // 	rawAnalyses, err := getAnalyses(client, ids)
 // 	if err != nil {
 // 		return nil, err
 // 	}
-// 	for index := range rawAnalyses {
-// 		logger.Println("Index:", index, "analysis")
+// 	rawCentroids, err := generateCentroids(rawAnalyses, singleCount, setCount, iterations)
+// 	if err != nil {
+// 		return nil, err
 // 	}
-
-// 	logger.Println("Generating centroids...")
-// 	// rawTatumCentroids := generateCentroidData(rawAnalyses)
-// 	// tatumCentroids := formatTatumCentroids(rawTatumCentroids)
-// 	tatumCentroids, err := generatePrimitiveTatumCentroids(rawAnalyses)
-
-// 	logger.Println("Formatting analyses...")
-// 	analyses := formatAnalyses(rawAnalyses, tatumCentroids)
-
-// 	logger.Println("Getting features...")
 // 	rawFeatures, err := getFeatures(client, ids)
 // 	if err != nil {
 // 		return nil, err
 // 	}
+// 	if shouldWrite {
+// 		err = writeFiles("analyses.txt", "features.txt", "centroids.txt", rawAnalyses, rawFeatures, rawCentroids)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 	}
+// 	//
+// 	for index := range rawAnalyses {
+// 		logger.Println("Index:", index, "analysis")
+// 	} //
+// 	centroids := formatCentroids(rawCentroids)
 
-// 	logger.Println("Formatting features...")
+// 	analyses := formatAnalyses(rawAnalyses, centroids)
+
 // 	features := formatFeatures(rawFeatures)
 // 	for index, val := range features {
 // 		logger.Println("Index:", index, val)
 // 	}
 
-// 	if shouldWrite {
-// 		logger.Println("Writing files...")
-// 		err = writeFiles("analyses.txt", "features.txt", "tatumCentroids.txt", rawAnalyses, rawFeatures, tatumCentroids)
+// 	genreData = formatData(analyses, features)
+// 	return genreData, nil
+// }
+
+// func generateDataFromFile(analysisFileName, featureFileName, centroidFileName string, shouldWrite, shouldCalc bool, singleCount, setCount, iterations int) (genreData [][]float64, err error) {
+// 	rawAnalyses, rawFeatures, rawCentroids, err := readFiles(analysisFileName, featureFileName, centroidFileName)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	if shouldCalc {
+// 		rawCentroids, err = generateCentroids(rawAnalyses, singleCount, setCount, iterations)
 // 		if err != nil {
 // 			return nil, err
 // 		}
 // 	}
 
-// 	logger.Println("Formatting genre data...")
-// 	genreData = formatData(analyses, features)
-// 	return genreData, nil
-// }
+// 	centroids := formatCentroids(rawCentroids)
 
-// func generateDataFromFile(analysisFileName string, featureFileName string, tatumCentroidFileName string, shouldWrite bool) (genreData [][]float64, err error) {
-// 	rawAnalyses, rawFeatures, tatumCentroids, err := readFiles(analysisFileName, featureFileName, tatumCentroidFileName)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	analyses := formatAnalyses(rawAnalyses, tatumCentroids)
+// 	analyses := formatAnalyses(rawAnalyses, centroids)
 // 	features := formatFeatures(rawFeatures)
 
 // 	if shouldWrite {
-// 		err = writeCentroidsFile("tatumCentroids.txt", tatumCentroids)
+// 		err = writeCentroidsFile("centroids.txt", rawCentroids)
 // 		if err != nil {
 // 			return nil, err
 // 		}
@@ -429,6 +402,8 @@ package csci152
 // }
 
 // func formatData(analyses [][]float64, features [][]float64) (data [][]float64) {
+// 	logger.Println("Formatting genre data...")
+
 // 	for index, val := range analyses {
 // 		var datum []float64
 // 		datum = append(datum, val...)
@@ -441,6 +416,8 @@ package csci152
 // }
 
 // func getFeatures(client *spotify.Client, ids []spotify.ID) (features []*spotify.AudioFeatures, err error) {
+// 	logger.Println("Getting features...")
+
 // 	idCopies := ids // Prevent modifying ID slice
 // 	idsLeftToProcess := len(idCopies)
 
@@ -467,38 +444,8 @@ package csci152
 // 	return features, nil
 // }
 
-// // original
-// // func standardizeData(rawData [][]float64) [][]float64 {
-// // 	colNum := len(rawData[0])
-// // 	rowNum := len(rawData)
-// // 	normData := initializeSlice(colNum, rowNum)
-
-// // 	for i := 0; i < rowNum; i++ {
-// // 		total := 0.0
-// // 		for j := 0; j < colNum; j++ {
-// // 			total += rawData[j][i]
-// // 		}
-// // 		mean := total / float64(rowNum)
-// // 		deviation := 0.0
-// // 		var differences []float64
-// // 		for j := 0; j < colNum; j++ {
-// // 			difference := rawData[j][i] - mean
-// // 			differences = append(differences, difference)
-// // 			deviation += math.Pow(difference, 2)
-// // 		}
-// // 		stdDeviation := math.Sqrt(deviation)
-// // 		for j := 0; j < colNum; j++ {
-// // 			normData[j][i] = (differences[j]) / stdDeviation
-// // 			//normData[j][i] = (rawData[j][i] - mean) / stdDeviation // gaussian normalization equation
-// // 		}
-// // 	}
-
-// // 	return normData
-// // }
-
 // // standardizeData will transform the raw data provided into a standardized set of float64 values
 // // using gaussian normalization
-// // row/cols in loops are wrong; see goplayground code
 // func standardizeData(rawData [][]float64) [][]float64 {
 // 	rowWidth := len(rawData[0])
 // 	colHeight := len(rawData)
@@ -520,27 +467,11 @@ package csci152
 // 		stdDeviation := math.Sqrt(deviation)
 // 		for j := 0; j < colHeight; j++ {
 // 			normData[j][i] = (differences[j]) / stdDeviation
-// 			//normData[j][i] = (rawData[j][i] - mean) / stdDeviation // gaussian normalization equation
 // 		}
 // 	}
 
 // 	return normData
 // }
-
-// /*
-// i := [][]int{{0,1,2},{3,4,5}}
-// 	fmt.Println(i)
-// 	fmt.Println()
-// 	for _, val := range i {
-// 		fmt.Println(val)
-// 		}
-// 	//fmt.Println()
-// 	//fmt.Println(i[0])
-// 	//colNum := len(i[0])
-// 	//fmt.Println(colNum)
-// 	fmt.Println()
-// 	fmt.Println(i[0][1])
-// */
 
 // // normalizeValue performs gaussian normalization on the specified value with the provided
 // // mean and standard deviation
@@ -548,6 +479,8 @@ package csci152
 // 	return (val - mean) / dev
 // }
 
+// // initializeSlice simply creates a two-dimensional slice of float64s with the specified
+// // width and height
 // func initializeSlice(width int, height int) [][]float64 {
 // 	slice := make([][]float64, height)
 // 	for index := range slice {
@@ -556,7 +489,11 @@ package csci152
 // 	return slice
 // }
 
-// func formatAnalyses(rawAnalyses []*spotify.AudioAnalysis, tatumCentroids [][]float64) (analyses [][]float64) {
+// // formatAnalyses will take the raw analysis objects and centroid data, parse through each and
+// // return a 2D slice of float64s with correctly formatted data
+// func formatAnalyses(rawAnalyses []*spotify.AudioAnalysis, centroids [][]float64) (analyses [][]float64) {
+// 	logger.Println("Formatting analyses...")
+
 // 	for index, val := range rawAnalyses {
 // 		var analysis []float64
 // 		analysis = append(analysis, val.TrackInfo.Duration)
@@ -565,20 +502,25 @@ package csci152
 // 		//analysis = append(analysis, float64(val.TrackInfo.Key))           //
 // 		analysis = append(analysis, val.TrackInfo.Loudness)
 // 		//analysis = append(analysis, float64(val.TrackInfo.Mode)) //
-// 		analysis = append(analysis, tatumCentroids[index]...)
+// 		analysis = append(analysis, centroids[index]...)
 
 // 		analyses = append(analyses, analysis)
 // 	}
+// 	logger.Println("Formatted analyses: ", analyses)
 // 	return analyses
 // }
 
+// // formatFeatures will take the raw audio features objects, parse though each, and return
+// // a 2D slice of float64s with correctly formatted data
 // func formatFeatures(tracks []*spotify.AudioFeatures) (features [][]float64) {
+// 	logger.Println("Formatting features...")
+
 // 	for _, val := range tracks {
 // 		var track []float64
 // 		track = append(track, float64(val.Acousticness))
 // 		track = append(track, float64(val.Danceability))
 // 		track = append(track, float64(val.Energy))
-// 		track = append(track, float64(val.Instrumentalness)) // Might remove
+// 		//track = append(track, float64(val.Instrumentalness)) // Might remove
 // 		track = append(track, float64(val.Liveness))
 // 		track = append(track, float64(val.Speechiness))
 // 		track = append(track, float64(val.Valence))
@@ -587,7 +529,11 @@ package csci152
 // 	return features
 // }
 
+// // getAnalyses will use the specified authorized client to make seperate API calls that will return
+// // the audio analysis of every song specified by the slice of IDs.
 // func getAnalyses(client *spotify.Client, ids []spotify.ID) (analyses []*spotify.AudioAnalysis, err error) {
+// 	logger.Println("Getting analyses...")
+
 // 	for index, val := range ids {
 // 		logger.Println("Getting analysis", index, "for", val)
 // 		analysis, err := client.GetAudioAnalysis(val)
@@ -602,7 +548,11 @@ package csci152
 // 	return analyses, nil
 // }
 
+// // getIDs will take a list of raw recommendation objects, parse them, then return a slice
+// // of IDs that pertain to each recommended track.
 // func getIDs(recs []*spotify.Recommendations) (ids []spotify.ID) {
+// 	logger.Println("Getting ID's...")
+
 // 	for _, val := range recs {
 // 		tracks := val.Tracks
 // 		for _, track := range tracks {
@@ -612,7 +562,11 @@ package csci152
 // 	return ids
 // }
 
+// // generateRecommendations uses the specified authorized client and the provided slice of seeds
+// // to make seperate API calls that return recommendations for the provided seeds.
 // func generateRecommendations(client *spotify.Client, seeds []spotify.Seeds, limit int) (recs []*spotify.Recommendations, err error) {
+// 	logger.Println("Generating recommendations...")
+
 // 	iterationsPerSeed := limit / 100
 // 	remainder := limit % 100
 // 	hundred := 100
@@ -641,7 +595,8 @@ package csci152
 // 	return recs, nil
 // }
 
-// func formatSeeds(genres []string) (seeds []spotify.Seeds) {
+// // getSeeds takes a list of genres and returns a slice of seed objects for the specified genres.
+// func getSeeds(genres []string) (seeds []spotify.Seeds) {
 // 	for _, val := range genres {
 // 		var values []string
 // 		values = append(values, val)
@@ -652,31 +607,10 @@ package csci152
 // 	return seeds
 // }
 
-// func trainNetwork() {
-// 	nn := gonn.DefaultNetwork(2, 3, 1, true)
-// 	inputs := [][]float64{
-// 		[]float64{0, 0},
-// 		[]float64{0, 1},
-// 		[]float64{1, 0},
-// 		[]float64{1, 1},
-// 	}
-
-// 	targets := [][]float64{
-// 		[]float64{0}, //0+0=0
-// 		[]float64{1}, //0+1=1
-// 		[]float64{1}, //1+0=1
-// 		[]float64{2}, //1+1=2
-// 	}
-
-// 	nn.Train(inputs, targets, 1000)
-
-// 	for _, p := range inputs {
-// 		fmt.Println(nn.Forward(p))
-// 	}
-// }
-
 // // I/O Functions
 
+// // initializeArgMap takes a list of expected command-line arguments as strings and
+// // returns a map using the arguments as keys and initialized false bools as values.
 // func initializeArgMap(argList []string) map[string]bool {
 // 	argMap := make(map[string]bool, 3)
 // 	for _, val := range argList {
@@ -685,6 +619,7 @@ package csci152
 // 	return argMap
 // }
 
+// // resolveCommandArgs takes an
 // func resolveCommandArgs(argMap map[string]bool) {
 // 	for _, val := range os.Args {
 // 		for index := range argMap {
@@ -695,7 +630,9 @@ package csci152
 // 	}
 // }
 
-// func writeFiles(analysisFileName, featureFileName, tatumCentroidFileName string, analyses []*spotify.AudioAnalysis, features []*spotify.AudioFeatures, tatumCentroids [][]float64) (err error) {
+// func writeFiles(analysisFileName, featureFileName, centroidFileName string, analyses []*spotify.AudioAnalysis, features []*spotify.AudioFeatures, centroids [][][]float64) (err error) {
+// 	logger.Println("Writing files...")
+
 // 	err = writeAnalysesFile(analysisFileName, analyses)
 // 	if err != nil {
 // 		return err
@@ -706,7 +643,7 @@ package csci152
 // 		return err
 // 	}
 
-// 	err = writeCentroidsFile(tatumCentroidFileName, tatumCentroids)
+// 	err = writeCentroidsFile(centroidFileName, centroids)
 // 	if err != nil {
 // 		return err
 // 	}
@@ -714,7 +651,7 @@ package csci152
 // 	return nil
 // }
 
-// func readFiles(analysisFileName string, featureFileName string, tatumCentroidFileName string) (analyses []*spotify.AudioAnalysis, features []*spotify.AudioFeatures, tatumCentroids [][]float64, err error) {
+// func readFiles(analysisFileName, featureFileName, centroidFileName string) (analyses []*spotify.AudioAnalysis, features []*spotify.AudioFeatures, centroids [][][]float64, err error) {
 // 	analyses, err = readAnalysisFile(analysisFileName)
 // 	if err != nil {
 // 		return nil, nil, nil, err
@@ -723,12 +660,12 @@ package csci152
 // 	if err != nil {
 // 		return nil, nil, nil, err
 // 	}
-// 	tatumCentroids, err = readCentroidsFile(tatumCentroidFileName)
+// 	centroids, err = readCentroidsFile(centroidFileName)
 // 	if err != nil {
 // 		return nil, nil, nil, err
 // 	}
 
-// 	return analyses, features, tatumCentroids, nil
+// 	return analyses, features, centroids, nil
 // }
 
 // func readAnalysisFile(fileName string) (analyses []*spotify.AudioAnalysis, err error) {
@@ -775,7 +712,9 @@ package csci152
 // 	return features, err
 // }
 
-// func readCentroidsFile(fileName string) (centroids [][]float64, err error) {
+// // readCentroidsFile takes the name of file and reads a slice of [][]float64's that represent
+// // precalculated centroids and returns that 3D slice.
+// func readCentroidsFile(fileName string) (centroids [][][]float64, err error) {
 // 	file, err := os.Open(fileName)
 // 	if err != nil {
 // 		return nil, err
@@ -829,7 +768,7 @@ package csci152
 // 	return nil
 // }
 
-// func writeCentroidsFile(fileName string, centroids [][]float64) error {
+// func writeCentroidsFile(fileName string, centroids [][][]float64) error {
 // 	file, err := os.Create(fileName)
 // 	if err != nil {
 // 		return err
@@ -839,7 +778,7 @@ package csci152
 // 	encoder := gob.NewEncoder(file)
 // 	err = encoder.Encode(centroids)
 // 	if err != nil {
-// 		return nil
+// 		return err
 // 	}
 // 	return nil
 // }
@@ -877,6 +816,6 @@ package csci152
 // 	}
 // 	// Retrieve authenticated client using token
 // 	client := auth.NewClient(tok)
-// 	fmt.Fprintf(w, "log Completed!")
+// 	fmt.Fprintf(w, "Login Completed!")
 // 	ch <- &client
 // }
