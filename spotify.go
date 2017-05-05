@@ -55,50 +55,57 @@ func spotifyUser() string {
 	return user
 }
 
-func loadPlayLists(res http.ResponseWriter, req *http.Request) {
+func loadPlayLists(res http.ResponseWriter, req *http.Request) string {
+	var pID string
+
 	ctx := appengine.NewContext(req)
 	log.Infof(ctx, "In playlist")
 	if clientOK() {
-		log.Infof(ctx, "Client Not Empty")
+		// log.Infof(ctx, "Client Not Empty")
 
-		user, _ := spotClient.CurrentUser()
-		log.Infof(ctx, "User ID: %v", user.ID)
+		// user, _ := spotClient.CurrentUser()
+		// log.Infof(ctx, "User ID: %v", user.ID)
+		// //
+		// sr, err := spotClient.CurrentUsersPlaylists()
+		sr, _ := spotClient.CurrentUsersPlaylists()
+		// srx, err := spotClient.CurrentUserRecentTracks(5)
 		//
-		sr, err := spotClient.CurrentUsersPlaylists()
-		srx, err := spotClient.CurrentUserRecentTracks(5)
-		//
-		log.Infof(ctx, "Playlist (full) ==> %v", sr)
-		if err == nil {
-			for _, val := range sr.Playlists {
-				trk, err := spotClient.GetPlaylistTracks(user.ID, val.ID)
-				if err == nil {
-					for _, tVal := range trk.Tracks {
-						log.Infof(ctx, "\nPlaylist (track) ==> %v\n", tVal.Track.Name)
-					}
-				}
-				if err != nil {
-					log.Infof(ctx, "Error")
-				}
-			}
-			log.Infof(ctx, "Items ==> %v", srx.Items)
-			// for _, val := range srx.Items {
-			// 	trk, err := spotClient.GetPlaylistTracks(user.ID, val.ID)
-			// 	if err == nil {
-			// 		for _, tVal := range trk.Tracks {
-			// 			log.Infof(ctx, "\nPlaylist (track) ==> %v\n", tVal.Track.Name)
-			// 		}
-			// 	}
-			if err != nil {
-				log.Infof(ctx, "Error")
-				// }
-			}
-		} else {
-			log.Infof(ctx, "Error %v", err)
-		}
-	} else {
-		log.Infof(ctx, "Client Empty")
+		// pID = sr.Playlists[0].ID.String()
+		log.Infof(ctx, "Playlist (full) ==> %v", sr.Playlists[0])
+		log.Infof(ctx, "Playlist (full) ==> %v", sr.Playlists[0].URI)
+		pID = string(sr.Playlists[0].URI)
+		// 	if err == nil {
+		// 		for _, val := range sr.Playlists {
+		// 			trk, err := spotClient.GetPlaylistTracks(user.ID, val.ID)
+		// 			if err == nil {
+		// 				for _, tVal := range trk.Tracks {
+		// 					log.Infof(ctx, "\nPlaylist (track) ==> %v\n", tVal.Track.Name)
+		// 				}
+		// 			}
+		// 			if err != nil {
+		// 				log.Infof(ctx, "Error")
+		// 			}
+		// 		}
+		// 		log.Infof(ctx, "Items ==> %v", srx.Items)
+		// 		// for _, val := range srx.Items {
+		// 		// 	trk, err := spotClient.GetPlaylistTracks(user.ID, val.ID)
+		// 		// 	if err == nil {
+		// 		// 		for _, tVal := range trk.Tracks {
+		// 		// 			log.Infof(ctx, "\nPlaylist (track) ==> %v\n", tVal.Track.Name)
+		// 		// 		}
+		// 		// 	}
+		// 		if err != nil {
+		// 			log.Infof(ctx, "Error")
+		// 			// }
+		// 		}
+		// 	} else {
+		// 		log.Infof(ctx, "Error %v", err)
+		// 	}
+		// } else {
+		// 	log.Infof(ctx, "Client Empty")
 	}
-	http.Redirect(res, req, "/home", http.StatusSeeOther)
+	return pID
+	// http.Redirect(res, req, "/home", http.StatusSeeOther)
 
 }
 

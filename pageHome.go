@@ -7,9 +7,7 @@ import (
 )
 
 func pageHome(res http.ResponseWriter, req *http.Request) {
-	// ctx := appengine.NewContext(req)
 	readCookie(res, req)
-	initSpotify(res, req)
 	if req.Method == "POST" {
 		fn := req.FormValue("cmdbutton")
 		switch fn {
@@ -17,15 +15,14 @@ func pageHome(res http.ResponseWriter, req *http.Request) {
 			http.Redirect(res, req, "/register", http.StatusSeeOther)
 		case "Login":
 			if checkUserLogin(res, req) {
-				// initSpotify(res, req)
-				webInformation.User.Username = spotifyUser()
-				// http.Redirect(res, req, "/home", http.StatusSeeOther)
+				initSpotify(res, req)
 			}
 		}
 	}
-	// log.Infof(ctx, "Client code in home => %v", spotClient)
-	// loadPlayLists(res, req)
-	// initSpotify(res, req)
+	webInformation.User.Username = spotifyUser()
+	if clientOK() {
+		webInformation.User.UserPlaylistID = loadPlayLists(res, req)
+	}
 	tpl.ExecuteTemplate(res, "homepage.html", webInformation)
 }
 

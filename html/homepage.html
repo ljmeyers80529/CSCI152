@@ -22,7 +22,7 @@
                 {{else}}
                 <h4>{{.User.Username}}</h4>
                 <li class="dropdown">
-                    <a href="#drop">{{.Username}}</a>
+                    <a href="#drop">{{.User.Username}}</a>
                     <div class="dropdown-content">
                         <a href="#">Settings</a>
                         <a href="#">Signout</a>
@@ -124,9 +124,12 @@
         <!-- ---------------------THIS SECTION WILL BE FOR THE STUFF NOT SHOWN IF USER IS LOGGED IN-------------------------------- -->
 
         {{else}}
-
+        <a href="/Logout" style="color:red">Logout</a>
+        <h1>XXXXX1234</h1>
+        <h4>https://embed.spotify.com/?uri={{.User.UserPlaylistID}}</h4>
         <div id="playerLogIn">
-            <iframe src="https://embed.spotify.com/?uri=spotify:user:spotify:playlist:{{.UserPlaylistID}}" width="720" height="640" frameborder="0"></iframe>
+            <!--<iframe src="https://embed.spotify.com/?uri=spotify:user:spotify:playlist:{{.User.UserPlaylistID}}" width="720" height="640" frameborder="0"></iframe>-->
+            <iframe src="https://embed.spotify.com/?uri={{.User.UserPlaylistID}}" width="720" height="640" frameborder="0"></iframe>
             <!-- 
             Add in the radar chart here.
         -->
