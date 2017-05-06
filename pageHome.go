@@ -11,8 +11,8 @@ func pageHome(res http.ResponseWriter, req *http.Request) {
 	if req.Method == "POST" {
 		fn := req.FormValue("cmdbutton")
 		switch fn {
-		case "Register":
-			http.Redirect(res, req, "/register", http.StatusSeeOther)
+		// case "Register":
+		// 	http.Redirect(res, req, "/register", http.StatusSeeOther)
 		case "Login":
 			if checkUserLogin(res, req) {
 				initSpotify(res, req)

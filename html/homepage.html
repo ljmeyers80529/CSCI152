@@ -15,17 +15,18 @@
                 <li><a href="/about">ABOUT</a></li>
                 {{if not .User.LoggedIn}}
                 <li>
-                    <p><input type="text" name="username" placeholder="Username" autofocus>
+                    <p>
+                        <input type="text" name="username" placeholder="Username" autofocus>
                         <input type="password" name="password" value="" placeholder="Password">
-                        <input type="submit" name="cmdbutton" value="Login"></p>
+                        <input type="submit" name="cmdbutton" value="Login">
+                    </p>
                 </li>
                 {{else}}
-                <h4>{{.User.Username}}</h4>
                 <li class="dropdown">
                     <a href="#drop">{{.User.Username}}</a>
                     <div class="dropdown-content">
                         <a href="#">Settings</a>
-                        <a href="#">Signout</a>
+                        <a href="/logout">Signout</a>
                     </div>
                 </li>
                 {{end}}
@@ -98,25 +99,45 @@
 
             <div id="bf">
                 <div id="container2">
-                    <h1>Taste Taste</h1>
-                    <img src="../img/test1.jpg">
-                    <p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
+                    <h1>Sample Radar Graph</h1>
+                    <canvas id="radarChart" height="600" width="600"></canvas>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+                    <script>
+                        var CHART = document.getElementById("radarChart");
+                        var radarChart = new Chart(CHART, {
+                            type: 'radar',
+                            data: data = {
+                                labels: ["Eating", "Drinking", "Sleeping", "Designing", "Coding", "Cycling", "Running"],
+                                datasets: [{
+                                    label: "My First dataset",
+                                    backgroundColor: "rgba(179,181,198,0.2)",
+                                    borderColor: "rgba(179,181,198,1)",
+                                    pointBackgroundColor: "rgba(179,181,198,1)",
+                                    pointBorderColor: "#fff",
+                                    pointHoverBackgroundColor: "#fff",
+                                    pointHoverBorderColor: "rgba(179,181,198,1)",
+                                    data: [65, 59, 90, 81, 56, 55, 40]
+                                }]
+                            },
+                            options: {
+                                scale: {
+                                    angleLines: {
+                                        color: 'rgba(0,255,0,0.2)'
+                                    },
+                                    gridLines: {
+                                        color: 'rgba(0,255,0,0.2)'
+                                    }
+                                }
+                            }
+                        });
+                    </script>
+                </div>
+                <div id="container3">
+                    <p>This is a sample graph that will illustrate the metrics of song displaying the genres the song can be associated with .</p>
                     <p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
                     <p>TESTING NAV BAR FIXED POSITION</p>
                     <p>TESTING NAV BAR FIXED POSITION</p>
                     <p>TESTING NAV BAR FIXED POSITION</p>
-                </div>
-
-                <div id="btf2">
-                    <div id="container3">
-                        <h1>Taste Taste</h1>
-                        <img src="../img/taste.jpeg" width="300" height="300">
-                        <p>Creates a personalized playlist based on your spotify listening habits for you to share with friends.</p>
-                        <p>Just connect your spotify account and a custom playlist will be created. You can download spotify <a href="https://www.spotify.com/us/download/other/" target="_blank">here.</a></p>
-                        <p>TESTING NAV BAR FIXED POSITION</p>
-                        <p>TESTING NAV BAR FIXED POSITION</p>
-                        <p>TESTING NAV BAR FIXED POSITION</p>
-                    </div>
                 </div>
             </div>
         </div>
@@ -124,18 +145,42 @@
         <!-- ---------------------THIS SECTION WILL BE FOR THE STUFF NOT SHOWN IF USER IS LOGGED IN-------------------------------- -->
 
         {{else}}
-        <a href="/Logout" style="color:red">Logout</a>
-        <h1>XXXXX1234</h1>
-        <h4>https://embed.spotify.com/?uri={{.User.UserPlaylistID}}</h4>
-        <div id="playerLogIn">
-            <!--<iframe src="https://embed.spotify.com/?uri=spotify:user:spotify:playlist:{{.User.UserPlaylistID}}" width="720" height="640" frameborder="0"></iframe>-->
+        <div id="player">
             <iframe src="https://embed.spotify.com/?uri={{.User.UserPlaylistID}}" width="720" height="640" frameborder="0"></iframe>
-            <!-- 
-            Add in the radar chart here.
-        -->
         </div>
         <div id="radar">
             <h1>Radar Graph</h1>
+            <canvas id="radarChart2" height="600" width="600"></canvas>
+            <script type="application/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js">
+                var CHART = document.getElementById("radarChart");
+                var radarChart = new Chart(CHART, {
+                    type: 'radar',
+                    data: data = {
+                        labels: ["Eating", "Drinking", "Sleeping", "Designing", "Coding", "Cycling", "Running"],
+                        datasets: [{
+                            label: "My First dataset",
+                            backgroundColor: "rgba(179,181,198,0.2)",
+                            borderColor: "rgba(179,181,198,1)",
+                            pointBackgroundColor: "rgba(179,181,198,1)",
+                            pointBorderColor: "#fff",
+                            pointHoverBackgroundColor: "#fff",
+                            pointHoverBorderColor: "rgba(179,181,198,1)",
+                            data: [65, 59, 90, 81, 56, 55, 40]
+                        }]
+                    },
+                    options: {
+                        scale: {
+                            angleLines: {
+                                color: 'rgba(0,255,0,0.2)'
+                            },
+                            gridLines: {
+                                color: 'rgba(0,255,0,0.2)'
+                            }
+                        }
+                    }
+                });
+            </script>
+
         </div>
         {{end}}
     </body>
