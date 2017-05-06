@@ -53,6 +53,11 @@ type userInformationType struct {
 	UserPlaylistID string
 }
 
+type radarType struct {
+	Data   []int
+	Labels []string
+}
+
 // // watched definition.
 // type watchedType struct {
 // 	ID                               int
@@ -65,7 +70,8 @@ type userInformationType struct {
 
 // type definition to rendering information to the website.
 type webInformationType struct {
-	User *userInformationType
+	User  *userInformationType
+	Radar radarType
 	// Counters    cdUpcomming
 	// Top, Pop, Game    topPopRated
 	// MovieTvGame movieTvGameInformation

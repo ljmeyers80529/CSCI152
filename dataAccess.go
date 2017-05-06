@@ -192,8 +192,9 @@ func toInt(req *http.Request, key string) (val int) {
 // set defaults.
 func setUserDefault() {
 	// mtg := movieTvGameInformation{0, "", "", "", 0, 0, nil, 0, "", "", 0}
+	rdr := radarType{nil, nil}
 	userInformation = userInformationType{"", "", "", "", false, false, ""}
-	webInformation = webInformationType{&userInformation}
+	webInformation = webInformationType{&userInformation, rdr}
 }
 
 // // tv information and search results.

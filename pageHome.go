@@ -16,6 +16,8 @@ func pageHome(res http.ResponseWriter, req *http.Request) {
 		case "Login":
 			if checkUserLogin(res, req) {
 				initSpotify(res, req)
+				webInformation.Radar.Data = []int{55, 45, 11, 46, 44}
+				webInformation.Radar.Labels = []string{"Soft Rook", "Heavy Metal", "Rap", "Classical", "Adult"}
 			}
 		}
 	}

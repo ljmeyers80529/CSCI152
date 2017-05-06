@@ -109,7 +109,7 @@
                             data: data = {
                                 labels: ["Eating", "Drinking", "Sleeping", "Designing", "Coding", "Cycling", "Running"],
                                 datasets: [{
-                                    label: "My First dataset",
+                                    label: "Taste Test Genre Distribution Graph",
                                     backgroundColor: "rgba(179,181,198,0.2)",
                                     borderColor: "rgba(179,181,198,1)",
                                     pointBackgroundColor: "rgba(179,181,198,1)",
@@ -145,44 +145,48 @@
         <!-- ---------------------THIS SECTION WILL BE FOR THE STUFF NOT SHOWN IF USER IS LOGGED IN-------------------------------- -->
 
         {{else}}
-        <div id="player">
-            <iframe src="https://embed.spotify.com/?uri={{.User.UserPlaylistID}}" width="720" height="640" frameborder="0"></iframe>
-        </div>
-        <div id="radar">
-            <h1>Radar Graph</h1>
-            <canvas id="radarChart2" height="600" width="600"></canvas>
-            <script type="application/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js">
-                var CHART = document.getElementById("radarChart");
-                var radarChart = new Chart(CHART, {
-                    type: 'radar',
-                    data: data = {
-                        labels: ["Eating", "Drinking", "Sleeping", "Designing", "Coding", "Cycling", "Running"],
-                        datasets: [{
-                            label: "My First dataset",
-                            backgroundColor: "rgba(179,181,198,0.2)",
-                            borderColor: "rgba(179,181,198,1)",
-                            pointBackgroundColor: "rgba(179,181,198,1)",
-                            pointBorderColor: "#fff",
-                            pointHoverBackgroundColor: "#fff",
-                            pointHoverBorderColor: "rgba(179,181,198,1)",
-                            data: [65, 59, 90, 81, 56, 55, 40]
-                        }]
-                    },
-                    options: {
-                        scale: {
-                            angleLines: {
-                                color: 'rgba(0,255,0,0.2)'
-                            },
-                            gridLines: {
-                                color: 'rgba(0,255,0,0.2)'
-                            }
-                        }
-                    }
-                });
-            </script>
+        <div class="btf1">
+            <div id="player">
+                <iframe src="https://embed.spotify.com/?uri={{.User.UserPlaylistID}}" width="720" height="640" frameborder="0"></iframe>
+            </div>
 
-        </div>
-        {{end}}
+            <div id="bf">
+                <div id="container2">
+                    <h1>Sample Radar Graph</h1>
+                    <canvas id="radarChart" height="600" width="600"></canvas>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+                    <script>
+                        var CHART = document.getElementById("radarChart");
+                        var radarChart = new Chart(CHART, {
+                            type: 'radar',
+                            data: data = {
+                                labels: {{.Radar.Labels}},
+                                datasets: [{
+                                    label: "Taste Test Genre Distribution Graph",
+                                    backgroundColor: "rgba(179,181,198,0.2)",
+                                    borderColor: "rgba(179,181,198,1)",
+                                    pointBackgroundColor: "rgba(179,181,198,1)",
+                                    pointBorderColor: "#fff",
+                                    pointHoverBackgroundColor: "#fff",
+                                    pointHoverBorderColor: "rgba(179,181,198,1)",
+                                    data: {{.Radar.Data}}
+                                }]
+                            },
+                            options: {
+                                scale: {
+                                    angleLines: {
+                                        color: 'rgba(0,255,0,0.2)'
+                                    },
+                                    gridLines: {
+                                        color: 'rgba(0,255,0,0.2)'
+                                    }
+                                }
+                            }
+                        });
+                    </script>
+                </div>
+            </div>
+            {{end}}
     </body>
 </form>
 
