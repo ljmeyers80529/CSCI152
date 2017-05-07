@@ -1,5 +1,5 @@
 // +build ignore
-package csci152
+//package csci152
 
 // package main
 
