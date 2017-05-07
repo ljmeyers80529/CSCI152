@@ -5,7 +5,9 @@ package main
 // local repo of the Spotify API
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -110,55 +112,53 @@ func main() {
 
 	generateUserGenreStatistics(client, 7, "short_term")
 
-	/*
-			var trackSeeds []spotify.ID
+	seeds := generateSeedsFromArtists()
+	fmt.Println("seeds", seeds)
+	attr := spotify.NewTrackAttributes()
 
-			for _, val := range short.Items {
-				trackSeeds = append(trackSeeds, val.ID)
-			}
-			for _, val := range trackSeeds {
-				fmt.Println("trackseeds: ", val)
-			}
+	data, err := client.GetRecommendations(seeds, attr, nil)
 
-			// for _, val := range long.Items {
-			// 	trackSeeds = append(trackSeeds, val.ID)
-			// }
+	// for _, val := range data {
+	// 	for _, item := range val.Items {
+	// 		//do something to each track
+	// 	}
+	// }
 
-			seeds := spotify.Seeds{Tracks: trackSeeds}
-			fmt.Println("seeds", seeds)
-			attr := spotify.NewTrackAttributes()
+	d, err := json.MarshalIndent(data, "", "  ")
+	fmt.Println("JSON DATA")
+	fmt.Println(d)
+	for _, val := range data.Tracks {
+		fmt.Println(val.Name)
+	}
+	err = ioutil.WriteFile("temp.txt", d, 0644)
 
-			data, err := client.GetRecommendations(seeds, attr, nil)
-
-			// for _, val := range data {
-			// 	for _, item := range val.Items {
-			// 		//do something to each track
-			// 	}
-			// }
-
-		d, err := json.MarshalIndent(data, "", "  ")
-		fmt.Println("JSON DATA")
-		fmt.Println(d)
-		for _, val := range data.Tracks {
-			fmt.Println(val.Name)
-		}
-		err = ioutil.WriteFile("temp.txt", d, 0644)
-	*/
 	if err != nil {
 		fmt.Println(err)
 	}
 
 }
 
+func getSeeds(genres []string) (seeds []spotify.Seeds) {
+	for _, val := range genres {
+		var values []string
+		values = append(values, val)
+		newSeed := spotify.Seeds{Genres: values}
+		seeds = append(seeds, newSeed)
+	}
+	seeds := spotify.Seeds{Tracks: trackSeeds}
+
+	return seeds
+}
+
 // generateUserGenreStatistics uses a spotify client, authorized within the "user-top-read" scope, to generate
 // a list of the user's top 'numberOfGenres' genres and their respective scores within the given
 // time range denoted by timeRange. Note: legal timeRange values are as follows - "short_term", "medium_term",
 // and "long_term", strecthing from 6 weeks, to 6 months, and over several years, respectively.
-func generateUserGenreStatistics(client *spotify.Client, numberOfGenres int, timeRange string) (topGenreTitles []string, topGenreScores []int, err error) {
+func generateUserGenreStatistics(client *spotify.Client, numberOfGenres int, timeRange string) (topGenreTitles []string, topGenreScores []int, topArtists *spotify.TopArtists, err error) {
 	// Gather user's top artists
-	topArtists, err := getUserTopArtists(client, timeRange)
+	topArtists, err = getUserTopArtists(client, timeRange)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	genres := extractGenres(topArtists)
@@ -171,7 +171,7 @@ func generateUserGenreStatistics(client *spotify.Client, numberOfGenres int, tim
 	fmt.Println("Top Genre titles: ", topGenreTitles)
 	fmt.Println("Top Genre scores: ", topGenreScores)
 
-	return topGenreTitles, topGenreScores, nil
+	return topGenreTitles, topGenreScores, topArtists, nil
 }
 
 // getUserTopArtists uses a spotify client, authorized within the "user-top-read" scope, to

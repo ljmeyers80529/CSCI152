@@ -54,13 +54,14 @@ func (g *Genre) removeArtist(artist string) {
 
 // generateUserGenreStatistics uses a spotify client, authorized within the "user-top-read" scope, to generate
 // a list of the user's top 'numberOfGenres' genres and their respective scores within the given
-// time range denoted by timeRange. Note: legal timeRange values are as follows - "short_term", "medium_term",
-// and "long_term", strecthing from 6 weeks, to 6 months, and over several years, respectively.
-func generateUserGenreStatistics(client *spotify.Client, numberOfGenres int, timeRange string) (topGenreTitles []string, topGenreScores []int, err error) {
+// time range denoted by timeRange. Additionally, the user's top artists are returned as a TopArtists object
+// Note: legal timeRange values are as follows - "short_term", "medium_term", and "long_term", stretching from
+// 6 weeks, to 6 months, and over several years, respectively.
+func generateUserGenreStatistics(client *spotify.Client, numberOfGenres int, timeRange string) (topGenreTitles []string, topGenreScores []int, topArtists *spotify.TopArtists, err error) {
 	// Gather user's top artists
-	topArtists, err := getUserTopArtists(client, timeRange)
+	topArtists, err = getUserTopArtists(client, timeRange)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	genres := extractGenres(topArtists)
@@ -73,7 +74,7 @@ func generateUserGenreStatistics(client *spotify.Client, numberOfGenres int, tim
 	fmt.Println("Top Genre titles: ", topGenreTitles)
 	fmt.Println("Top Genre scores: ", topGenreScores)
 
-	return topGenreTitles, topGenreScores, nil
+	return topGenreTitles, topGenreScores, topArtists, nil
 }
 
 // getUserTopArtists uses a spotify client, authorized within the "user-top-read" scope, to
