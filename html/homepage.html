@@ -107,7 +107,7 @@
                         var radarChart = new Chart(CHART, {
                             type: 'radar',
                             data: data = {
-                                labels: ["Eating", "Drinking", "Sleeping", "Designing", "Coding", "Cycling", "Running"],
+								labels: ["Soft Rock", "Adult", "Jazz", "Rap", "Classical", "Blues", "Alternative"],
                                 datasets: [{
                                     label: "Taste Test Genre Distribution Graph",
                                     backgroundColor: "rgba(179,181,198,0.2)",
@@ -152,7 +152,7 @@
 
             <div id="bf">
                 <div id="container2">
-                    <h1>Sample Radar Graph</h1>
+                    <h1>{{.User.Username}} Genre Distrubution Graph</h1>
                     <canvas id="radarChart" height="600" width="600"></canvas>
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
                     <script>
