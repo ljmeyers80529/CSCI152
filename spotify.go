@@ -29,7 +29,7 @@ func initSpotify(res http.ResponseWriter, req *http.Request) {
 	// ctx := appengine.NewContext(req)
 	// log.Infof(ctx, "Spot login state: %v", webInformation.User.SpotLogged)
 	if !webInformation.User.SpotLogged {
-		auth = spotify.NewAuthenticator(retrieveURI, spotify.ScopeUserReadRecentlyPlayed)
+		auth = spotify.NewAuthenticator(retrieveURI, spotify.ScopeUserReadRecentlyPlayed, spotify.ScopeUserTopRead)
 		auth.SetAuthInfo(clientID, spotKey)
 		http.Redirect(res, req, auth.AuthURL(spotStateValue), http.StatusFound)
 	}
@@ -55,11 +55,11 @@ func spotifyUser() string {
 	return user
 }
 
-func loadPlayLists(res http.ResponseWriter, req *http.Request) string {
+func getLoggedInUsersPlaylist(res http.ResponseWriter, req *http.Request) string {
 	var pID string
 
-	ctx := appengine.NewContext(req)
-	log.Infof(ctx, "In playlist")
+	// ctx := appengine.NewContext(req)
+	// log.Infof(ctx, "In playlist")
 	if clientOK() {
 		// log.Infof(ctx, "Client Not Empty")
 
@@ -71,8 +71,8 @@ func loadPlayLists(res http.ResponseWriter, req *http.Request) string {
 		// srx, err := spotClient.CurrentUserRecentTracks(5)
 		//
 		// pID = sr.Playlists[0].ID.String()
-		log.Infof(ctx, "Playlist (full) ==> %v", sr.Playlists[0])
-		log.Infof(ctx, "Playlist (full) ==> %v", sr.Playlists[0].URI)
+		// log.Infof(ctx, "Playlist (full) ==> %v", sr.Playlists[0])
+		// log.Infof(ctx, "Playlist (full) ==> %v", sr.Playlists[0].URI)
 		pID = string(sr.Playlists[0].URI)
 		// 	if err == nil {
 		// 		for _, val := range sr.Playlists {

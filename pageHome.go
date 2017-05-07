@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"google.golang.org/appengine"
-	"google.golang.org/appengine/log"
 )
 
 func pageHome(res http.ResponseWriter, req *http.Request) {
@@ -22,20 +21,27 @@ func pageHome(res http.ResponseWriter, req *http.Request) {
 		case "Login":
 			if checkUserLogin(res, req) {
 				initSpotify(res, req)
-				webInformation.Radar.Data = []int{55, 45, 11, 46, 44}
-				webInformation.Radar.Labels = []string{"Soft Rook", "Heavy Metal", "Rap", "Classical", "Adult"}
+				// webInformation.Radar.Data = []int{55, 45, 11, 46, 44}
+				// webInformation.Radar.Labels = []string{"Soft Rook", "Heavy Metal", "Rap", "Classical", "Adult"}
 			}
 		}
 	}
 	webInformation.User.Username = spotifyUser()
 	if clientOK() {
-		ctx := appengine.NewContext(req)
-		webInformation.User.UserPlaylistID = loadPlayLists(res, req)
-		tgl, tgs, ta, err := generateUserGenreStatistics(&spotClient, 10, "short_term")
-		log.Infof(ctx, "tgl: %v", tgl)
-		log.Infof(ctx, "tgs: %v", tgs)
-		log.Infof(ctx, "ta: %v", ta)
-		log.Infof(ctx, "err: %v", err)
+		webInformation.User.UserPlaylistID = getLoggedInUsersPlaylist(res, req)
+		// ctx := appengine.NewContext(req)
+		tgl, tgs, _, err := generateUserGenreStatistics(&spotClient, 10, "long_term")
+		if err == nil {
+			// log.Infof(ctx, "tgl: %v", tgl)
+			// log.Infof(ctx, "tgs: %v", tgs)
+			// log.Infof(ctx, "ta: %v", ta)
+			// log.Infof(ctx, "err: %v", err)
+			webInformation.Radar.Data = tgs
+			webInformation.Radar.Labels = tgl
+		} else {
+			webInformation.Radar.Data = []int{55, 45, 11, 46, 44}
+			webInformation.Radar.Labels = []string{"Soft Rook", "Heavy Metal", "Rap", "Classical", "Adult"}
+		}
 	}
 	tpl.ExecuteTemplate(res, "homepage.html", webInformation)
 }
