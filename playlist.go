@@ -14,7 +14,7 @@ import (
 // a list of the user's genre's top scores as ints stored respective to the previous top genres list,
 // and a topArtists object for the user. The output of the function is a complete FullPlaylist object
 // containing all of the identifying information needed such as ID, URI, Name, Owner, etc.
-func generateUserPlaylist(client *spotify.Client, playlistSize int, topGenres []string, topScores []int, topArtists *spotify.TopArtists) (playlist *spotify.FullPlaylist, err error) {
+func generateUserPlaylist(client *spotify.Client, playlistSize int, timeRange string, topGenres []string, topScores []int, topArtists *spotify.TopArtists) (playlist *spotify.FullPlaylist, err error) {
 	if playlistSize > 50 {
 		err = errors.New("generateUserPlaylist: queried playlist creation size exceeds 50")
 		return nil, err
@@ -37,7 +37,21 @@ func generateUserPlaylist(client *spotify.Client, playlistSize int, topGenres []
 		return nil, err
 	}
 
-	playlist, err = client.CreatePlaylistForUser(user.ID, playlistNameConst, true)
+	var playlistName string
+
+	switch timeRange {
+	case "short_term":
+		playlistName = shortPlaylistName
+	case "medium_term":
+		playlistName = mediumPlaylistName
+	case "long_term":
+		playlistName = longPlaylistName
+	default:
+		err = errors.New("invalid time range")
+		return nil, err
+	}
+
+	playlist, err = client.CreatePlaylistForUser(user.ID, playlistName, true)
 	if err != nil {
 		return nil, err
 	}

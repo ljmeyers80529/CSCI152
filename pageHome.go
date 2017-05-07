@@ -32,17 +32,19 @@ func pageHome(res http.ResponseWriter, req *http.Request) {
 	term := req.FormValue("term")
 	switch term {
 	case "long":
-		term = "long-term"
+		term = "long_term"
 	case "medium":
-		term = "medium-term"
+		term = "medium_term"
 	default:
-		term = "short-term"
+		term = "short_term"
 	}
 	log.Infof(ctx, "Term = %s", term)
 	webInformation.User.Username = spotifyUser()
 	if clientOK() {
-		webInformation.User.UserPlaylistID = getLoggedInUsersPlaylist(res, req)
-		tgl, tgs, _, err := generateUserGenreStatistics(&spotClient, 10, term)
+		//webInformation.User.UserPlaylistID = getLoggedInUsersPlaylist(res, req)
+		tgl, tgs, ta, err := generateUserGenreStatistics(&spotClient, 7, term)
+		playlist, err := generateUserPlaylist(&spotClient, playlistSizeConst, tgl, tgs, ta)
+		webInformation.User.UserPlaylistID = string(playlist.URI)
 		// ctx := appengine.NewContext(req)
 		log.Infof(ctx, "tgl: %v", tgl)
 		log.Infof(ctx, "tgs: %v", tgs)
@@ -55,7 +57,7 @@ func pageHome(res http.ResponseWriter, req *http.Request) {
 		} else {
 			webInformation.User.SpotifyUsername = "Sample"
 			webInformation.Radar.Data = []int{55, 45, 11, 46, 44}
-			webInformation.Radar.Labels = []string{"Soft Rook", "Heavy Metal", "Rap", "Classical", "Adult"}
+			webInformation.Radar.Labels = []string{"Soft Rock", "Heavy Metal", "Rap", "Classical", "Adult"}
 		}
 	}
 	tpl.ExecuteTemplate(res, "homepage.html", webInformation)
