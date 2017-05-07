@@ -1,4 +1,5 @@
 // +build ignore
+
 package main
 
 // Trying to run this code will result in an error due to a custom function on my

@@ -1,9 +1,11 @@
 package csci152
 
 import (
+	"io"
 	"net/http"
 
 	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 )
 
 func pageHome(res http.ResponseWriter, req *http.Request) {
@@ -11,10 +13,16 @@ func pageHome(res http.ResponseWriter, req *http.Request) {
 	if req.Method == "POST" {
 		fn := req.FormValue("cmdbutton")
 		switch fn {
-		// case "Register":
-		// 	http.Redirect(res, req, "/register", http.StatusSeeOther)
+		case "OK":
+			if WriteNewUserInformation(res, req) {
+				http.Redirect(res, req, "/home", http.StatusFound)
+			}
+		case "Cancel":
+			http.Redirect(res, req, "/home", http.StatusFound)
 		case "Login":
 			if checkUserLogin(res, req) {
+				ctx := appengine.NewContext(req)
+				log.Infof(ctx, "logged in")
 				initSpotify(res, req)
 				webInformation.Radar.Data = []int{55, 45, 11, 46, 44}
 				webInformation.Radar.Labels = []string{"Soft Rook", "Heavy Metal", "Rap", "Classical", "Adult"}
@@ -43,4 +51,13 @@ func checkUserLogin(res http.ResponseWriter, req *http.Request) bool {
 		updateCookie(res, req)
 	}
 	return userInformation.LoggedIn
+}
+
+// check if username exists.
+func pageRegisterUsernameCheck(res http.ResponseWriter, req *http.Request) {
+	if ex, _ := UsernameExists(req); ex {
+		io.WriteString(res, "false")
+		return
+	}
+	io.WriteString(res, "true")
 }
