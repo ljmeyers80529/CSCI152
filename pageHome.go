@@ -43,7 +43,7 @@ func pageHome(res http.ResponseWriter, req *http.Request) {
 	if clientOK() {
 		//webInformation.User.UserPlaylistID = getLoggedInUsersPlaylist(res, req)
 		tgl, tgs, ta, err := generateUserGenreStatistics(&spotClient, 7, term)
-		playlist, err := generateUserPlaylist(&spotClient, playlistSizeConst, tgl, tgs, ta)
+		playlist, err := generateUserPlaylist(&spotClient, playlistSizeConst, term, tgl, tgs, ta)
 		webInformation.User.UserPlaylistID = string(playlist.URI)
 		// ctx := appengine.NewContext(req)
 		log.Infof(ctx, "tgl: %v", tgl)
