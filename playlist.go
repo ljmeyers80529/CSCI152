@@ -15,6 +15,10 @@ import (
 // and a topArtists object for the user. The output of the function is a complete FullPlaylist object
 // containing all of the identifying information needed such as ID, URI, Name, Owner, etc.
 func generateUserPlaylist(client *spotify.Client, playlistSize int, topGenres []string, topScores []int, topArtists *spotify.TopArtists) (playlist *spotify.FullPlaylist, err error) {
+	if playlistSize > 50 {
+		err = errors.New("generateUserPlaylist: queried playlist creation size exceeds 50")
+		return nil, err
+	}
 	seeds, err := generateSeedsByGenre(topGenres, topArtists.Items)
 	if err != nil {
 		return nil, err
