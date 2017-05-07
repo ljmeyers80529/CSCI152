@@ -115,8 +115,9 @@
 
 {{else}}
 <body>
+<div id = "logdin">
     <div id = "playerLogIn">
-        <iframe src="https://embed.spotify.com/?uri=spotify:user:spotify:playlist:{{.userPlaylistID}}" width="720" height="640" frameborder="0"></iframe>
+        <iframe src="https://embed.spotify.com/?uri=spotify:user:spotify:playlist:{{.userPlaylistID}}" width="645" height="640" frameborder="0"></iframe>
 
 
         <!-- Add in the radar chart here.
@@ -127,6 +128,17 @@
         <canvas id="radarChart2" height="600" width="600"></canvas>
         <script src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
         <script src ="js/main.js"></script>
+
+        <div class="buttonHolder">
+            <a href="#" class="button tick"></a>
+            <a href="#" class="button cross"></a>
+            <a href="#" class="button heart"></a>
+        </div>
+
+
+
+
     </div>
+</div>
 </body>
 {{end}}

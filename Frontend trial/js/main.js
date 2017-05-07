@@ -18,6 +18,15 @@ let radarChart = new Chart(CHART, {
             }
         ]
     },
-
-
+    options: {
+        scale: {
+            angleLines: {
+                color: 'rgba(0,255,0,0.2)'
+            },
+            gridLines: {
+                color: 'rgba(0,255,0,0.2)'
+            }
+        }
+    }
 });
+
