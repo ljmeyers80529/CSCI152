@@ -241,7 +241,7 @@ func calculateTracksPerGenre(weights []float64, total int) (tracksPerGenre []int
 // getSeededRecommendations uses an authorized spotify client to fetch a list of recommendation
 // objects from a Spotify endpoint using the provided seeds and the corresponding track limit.
 func getSeededRecommendations(client *spotify.Client, seeds []spotify.Seeds, tracksPerGenre []int) (recommendations []*spotify.Recommendations, err error) {
-	attr := spotify.NewTrackAttributes().TargetPopularity(80)
+	attr := spotify.NewTrackAttributes()
 
 	for index, seed := range seeds {
 		opts := spotify.Options{Limit: &tracksPerGenre[index]}

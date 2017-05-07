@@ -1,10 +1,10 @@
 {
   "collaborative": false,
   "external_urls": {
-    "spotify": "http://open.spotify.com/user/blaqkangel/playlist/2Cmy0tf1dj1JuahLgcTQEf"
+    "spotify": "http://open.spotify.com/user/blaqkangel/playlist/75UsuJejAqPRIZ7V2tGGFU"
   },
-  "href": "https://api.spotify.com/v1/users/blaqkangel/playlists/2Cmy0tf1dj1JuahLgcTQEf",
-  "id": "2Cmy0tf1dj1JuahLgcTQEf",
+  "href": "https://api.spotify.com/v1/users/blaqkangel/playlists/75UsuJejAqPRIZ7V2tGGFU",
+  "id": "75UsuJejAqPRIZ7V2tGGFU",
   "images": [],
   "name": "Taste Test - Personal Playlist",
   "owner": {
@@ -22,15 +22,15 @@
     "uri": "spotify:user:blaqkangel"
   },
   "public": true,
-  "snapshot_id": "1mv8HWD8vgSD7H8b7lcSlFxAMRgYcFKvNOv6r2SfRaTj0NajIpXjfmH4EFmuj1Uq",
-  "uri": "spotify:user:blaqkangel:playlist:2Cmy0tf1dj1JuahLgcTQEf",
+  "snapshot_id": "43ERDJoA9R1sR+wqSOpfDi6pTDRyKI+N3dr+RmDIjs9JgjbLL/m/HSQRCWhamVKm",
+  "uri": "spotify:user:blaqkangel:playlist:75UsuJejAqPRIZ7V2tGGFU",
   "description": "",
   "followers": {
     "total": 0,
     "href": ""
   },
   "tracks": {
-    "href": "https://api.spotify.com/v1/users/blaqkangel/playlists/2Cmy0tf1dj1JuahLgcTQEf/tracks",
+    "href": "https://api.spotify.com/v1/users/blaqkangel/playlists/75UsuJejAqPRIZ7V2tGGFU/tracks",
     "limit": 100,
     "offset": 0,
     "total": 0,
