@@ -21,8 +21,6 @@ func pageHome(res http.ResponseWriter, req *http.Request) {
 			http.Redirect(res, req, "/home", http.StatusFound)
 		case "Login":
 			if checkUserLogin(res, req) {
-				ctx := appengine.NewContext(req)
-				log.Infof(ctx, "logged in")
 				initSpotify(res, req)
 				webInformation.Radar.Data = []int{55, 45, 11, 46, 44}
 				webInformation.Radar.Labels = []string{"Soft Rook", "Heavy Metal", "Rap", "Classical", "Adult"}
@@ -31,7 +29,13 @@ func pageHome(res http.ResponseWriter, req *http.Request) {
 	}
 	webInformation.User.Username = spotifyUser()
 	if clientOK() {
+		ctx := appengine.NewContext(req)
 		webInformation.User.UserPlaylistID = loadPlayLists(res, req)
+		tgl, tgs, ta, err := generateUserGenreStatistics(&spotClient, 10, "short_term")
+		log.Infof(ctx, "tgl: %v", tgl)
+		log.Infof(ctx, "tgs: %v", tgs)
+		log.Infof(ctx, "ta: %v", ta)
+		log.Infof(ctx, "err: %v", err)
 	}
 	tpl.ExecuteTemplate(res, "homepage.html", webInformation)
 }

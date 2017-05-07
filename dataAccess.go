@@ -14,7 +14,6 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/memcache"
 )
 
@@ -65,7 +64,6 @@ func WriteNewUserInformation(res http.ResponseWriter, req *http.Request) (regist
 	conf := req.FormValue("confirm")
 	spot := "X1"
 	un := req.FormValue("newusername")
-	log.Infof(ctx, "UN %v\tP1 %v\tP2 %v\tSpot %v", un, pass, conf, spot)
 
 	names.Name = un
 
