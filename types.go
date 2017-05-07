@@ -44,13 +44,14 @@ type dictionaryUserName struct { // name type to be read from dictionary of user
 
 // type to contain user information and preferences.
 type userInformationType struct {
-	UserID         string
-	SpotifyAccount string
-	Password       string
-	Username       string
-	LoggedIn       bool
-	SpotLogged     bool
-	UserPlaylistID string
+	UserID          string
+	SpotifyAccount  string
+	Password        string
+	Username        string
+	LoggedIn        bool
+	SpotLogged      bool
+	UserPlaylistID  string
+	SpotifyUsername string
 }
 
 type radarType struct {

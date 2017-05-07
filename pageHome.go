@@ -5,10 +5,13 @@ import (
 	"net/http"
 
 	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 )
 
 func pageHome(res http.ResponseWriter, req *http.Request) {
 	readCookie(res, req)
+	ctx := appengine.NewContext(req)
+	log.Infof(ctx, "Received path = %s", req.URL.Path)
 	if req.Method == "POST" {
 		fn := req.FormValue("cmdbutton")
 		switch fn {
@@ -26,19 +29,31 @@ func pageHome(res http.ResponseWriter, req *http.Request) {
 			}
 		}
 	}
+	term := req.FormValue("term")
+	switch term {
+	case "long":
+		term = "long-term"
+	case "medium":
+		term = "medium-term"
+	default:
+		term = "short-term"
+	}
+	log.Infof(ctx, "Term = %s", term)
 	webInformation.User.Username = spotifyUser()
 	if clientOK() {
 		webInformation.User.UserPlaylistID = getLoggedInUsersPlaylist(res, req)
+		tgl, tgs, _, err := generateUserGenreStatistics(&spotClient, 10, term)
 		// ctx := appengine.NewContext(req)
-		tgl, tgs, _, err := generateUserGenreStatistics(&spotClient, 10, "long_term")
+		log.Infof(ctx, "tgl: %v", tgl)
+		log.Infof(ctx, "tgs: %v", tgs)
+		// log.Infof(ctx, "ta: %v", ta)
+		log.Infof(ctx, "err: %v", err)
 		if err == nil {
-			// log.Infof(ctx, "tgl: %v", tgl)
-			// log.Infof(ctx, "tgs: %v", tgs)
-			// log.Infof(ctx, "ta: %v", ta)
-			// log.Infof(ctx, "err: %v", err)
+			webInformation.User.SpotifyUsername = webInformation.User.Username
 			webInformation.Radar.Data = tgs
 			webInformation.Radar.Labels = tgl
 		} else {
+			webInformation.User.SpotifyUsername = "Sample"
 			webInformation.Radar.Data = []int{55, 45, 11, 46, 44}
 			webInformation.Radar.Labels = []string{"Soft Rook", "Heavy Metal", "Rap", "Classical", "Adult"}
 		}

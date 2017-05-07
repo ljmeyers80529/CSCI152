@@ -193,7 +193,7 @@ func toInt(req *http.Request, key string) (val int) {
 // set defaults.
 func setUserDefault() {
 	rdr := radarType{nil, nil}
-	userInformation = userInformationType{"", "", "", "", false, false, ""}
+	userInformation = userInformationType{"", "", "", "", false, false, "", ""}
 	webInformation = webInformationType{&userInformation, rdr}
 }
 
