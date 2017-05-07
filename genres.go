@@ -113,7 +113,7 @@ func getUserTopArtists(client *spotify.Client, timeRange string) (top *spotify.T
 // to return a list of Genre objects with their respective titles, artists, scores, and bonuses
 // set to their correct values.
 func extractGenres(artists *spotify.TopArtists, genreFloorLimit int) (genreList []Genre, err error) {
-	if len(artists.Items) < 25 {
+	if len(artists.Items) < 15 {
 		err = errors.New("extract genres: insufficient 'top artist' information in user data")
 		return nil, err
 	}

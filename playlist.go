@@ -7,25 +7,20 @@ import (
 	spotify "github.com/ljmeyers80529/spot-go-gae"
 )
 
-// generateUserPlaylist uses an authenticated spotify client to generate a personalized playlist
-// to the currently logged in user, leveraging their top played artists and their most listened to
-// genres as seeds for the playlist creation. The goal of the playlist is to demonstrate the user's
-// taste in a music in a compact manner. The returned value a FullPlaylist object containing all of
-// the identifying information needed such as ID, URI, Name, Owner, etc.
-func generateUserPlaylist(client *spotify.Client) (playlist *spotify.FullPlaylist, err error) {
-	playlistSize := 30
-
-	topGenreTitles, topGenreScores, topArtists, err := generateUserGenreStatistics(client, 7, "short_term")
+// generatePersonalizedPlaylist uses uses an authenticated spotify client and the user's genre
+// statistics as input to generate a playlist of a size denoted by the playlistSize parameter.
+// The required statistics input are two lists and an object that can be retrieved using the
+// generateUserGenreStatistics function and are as follows: a list of the users top genres as strings,
+// a list of the user's genre's top scores as ints stored respective to the previous top genres list,
+// and a topArtists object for the user. The output of the function is a complete FullPlaylist object
+// containing all of the identifying information needed such as ID, URI, Name, Owner, etc.
+func generateUserPlaylist(client *spotify.Client, playlistSize int, topGenres []string, topScores []int, topArtists *spotify.TopArtists) (playlist *spotify.FullPlaylist, err error) {
+	seeds, err := generateSeedsByGenre(topGenres, topArtists.Items)
 	if err != nil {
 		return nil, err
 	}
 
-	seeds, err := generateSeedsByGenre(topGenreTitles, topArtists.Items)
-	if err != nil {
-		return nil, err
-	}
-
-	genreWeights := calculateGenreWeights(topGenreScores)
+	genreWeights := calculateGenreWeights(topScores)
 	tracksPerGenre := calculateTracksPerGenre(genreWeights, playlistSize)
 	recommendations, err := getSeededRecommendations(client, seeds, tracksPerGenre)
 	if err != nil {

@@ -1,15 +1,8 @@
-// +build ignore
-
 package main
 
-// Trying to run this code will result in an error due to a custom function on my
-// local repo of the Spotify API
-
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math"
 	"net/http"
@@ -33,8 +26,65 @@ var (
 	auth = spotify.NewAuthenticator(redirectURI, spotify.ScopeUserTopRead, spotify.ScopePlaylistModifyPublic)
 	//auth  = spotify.NewAuthenticator(redirectURI, "user-read-recently-played")
 	ch    = make(chan *spotify.Client)
+	ch2   = make(chan *spotify.Client)
 	state = "abc123"
 )
+
+func main() {
+	// Set SPOTIFY_ID and SPOTIFY_SECRET
+	auth.SetAuthInfo(testID, testSecret)
+
+	// Start HTTP Server
+	http.HandleFunc("/callback", completeAuth)
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Got request for:", r.URL.String())
+	})
+	go http.ListenAndServe(":8080", nil)
+
+	url := auth.AuthURL(state)
+	fmt.Println("Please log in to Spotify by visiting the following page in your browser:", url)
+
+	// wait for auth to complete
+	client := <-ch
+
+	// use the client to make calls that require authorization
+	user, err := client.CurrentUser()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("You are logged in as:", user.ID)
+
+	// topGenreTitle, topGenreScores, topArtists, err := generateUserGenreStatistics(client, 7, "short_term")
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
+
+	topGenres, topScores, topArtists, err := generateUserGenreStatistics(client, 3, "long_term")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	_, err = generateUserPlaylist(client, 30, topGenres, topScores, topArtists)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	client2 := <-ch2
+	fmt.Println(client2)
+
+	// d, err := json.MarshalIndent(data, "", "  ")
+	// fmt.Println("JSON DATA")
+	// fmt.Println(d)
+
+	// err = ioutil.WriteFile("temp.txt", d, 0644)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+
+}
 
 // Genre contains the title, score, bonus, and a list of artists pertaining to a particular genre.
 // Note: none of these fields are exported (private, not public)
@@ -82,72 +132,172 @@ func (g *Genre) removeArtist(artist string) {
 	}
 }
 
-func main() {
-	// Set SPOTIFY_ID and SPOTIFY_SECRET
-	auth.SetAuthInfo(testID, testSecret)
-
-	// Start HTTP Server
-	http.HandleFunc("/callback", completeAuth)
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Got request for:", r.URL.String())
-	})
-	go http.ListenAndServe(":8080", nil)
-
-	url := auth.AuthURL(state)
-	fmt.Println("Please log in to Spotify by visiting the following page in your browser:", url)
-
-	// wait for auth to complete
-	client := <-ch
-
-	// use the client to make calls that require authorization
-	user, err := client.CurrentUser()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("You are logged in as:", user.ID)
-
-	// topGenreTitle, topGenreScores, topArtists, err := generateUserGenreStatistics(client, 7, "short_term")
-	// if err != nil {
-	// 	log.Println(err)
-	// 	return
-	// }
-
-	data, err := generateUserPlaylist(client)
-	if err != nil {
-		log.Println(err)
-		return
+// generateUserGenreStatistics uses a spotify client, authorized within the "user-top-read" scope, to generate
+// a list of the user's top 'numberOfGenres' (limited to 10) genres and their respective scores within the given
+// time range denoted by timeRange. Additionally, the user's top artists are returned as a TopArtists object
+// Note: legal timeRange values are as follows - "short_term", "medium_term", and "long_term", stretching from
+// 6 weeks, to 6 months, and over several years, respectively.
+func generateUserGenreStatistics(client *spotify.Client, numberOfGenres int, timeRange string) (topGenreTitles []string, topGenreScores []int, topArtists *spotify.TopArtists, err error) {
+	// Gather user's top artists
+	if numberOfGenres > 10 {
+		err = errors.New("number of genre's requested exceeds 10")
+		return nil, nil, nil, err
 	}
 
-	d, err := json.MarshalIndent(data, "", "  ")
-	fmt.Println("JSON DATA")
-	fmt.Println(d)
-
-	err = ioutil.WriteFile("temp.txt", d, 0644)
-	if err != nil {
-		fmt.Println(err)
+	if !(timeRange == "short_term" || timeRange == "medium_term" || timeRange == "long_term") {
+		err = errors.New("invalid time range input")
+		return nil, nil, nil, err
 	}
 
+	topArtists, err = getUserTopArtists(client, timeRange)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	genres, err := extractGenres(topArtists, numberOfGenres)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	for _, val := range genres {
+		fmt.Println(val)
+	}
+
+	topGenreTitles, topGenreScores, err = calculateTopGenres(numberOfGenres, genres)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	return topGenreTitles, topGenreScores, topArtists, nil
 }
 
-// generateUserPlaylist uses an authenticated spotify client to generate a personalized playlist
-// to the currently logged in user, leveraging their top played artists and their most listened to
-// genres as seeds for the playlist creation. The goal of the playlist is to demonstrate the user's
-// taste in a music in a compact manner. The returned value a FullPlaylist object containing all of
-// the identifying information needed such as ID, URI, Name, Owner, etc.
-func generateUserPlaylist(client *spotify.Client) (playlist *spotify.FullPlaylist, err error) {
-	playlistSize := 30
+// getUserTopArtists uses a spotify client, authorized within the "user-top-read" scope, to
+// get the users top 50 artists within the given time range using Spotify endpoints.
+func getUserTopArtists(client *spotify.Client, timeRange string) (top *spotify.TopArtists, err error) {
+	limit := 50
 
-	topGenreTitles, topGenreScores, topArtists, err := generateUserGenreStatistics(client, 7, "short_term")
+	opt := spotify.Options{
+		Limit:     &limit,
+		Timerange: &timeRange,
+	}
+	top, err = client.CurrentUserTopArtists(&opt)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	return top, nil
+}
+
+// extractGenres parses through a list of artists stored within a TopArtists object in order
+// to return a list of Genre objects with their respective titles, artists, scores, and bonuses
+// set to their correct values.
+func extractGenres(artists *spotify.TopArtists, genreFloorLimit int) (genreList []Genre, err error) {
+	if len(artists.Items) < 15 {
+		err = errors.New("extract genres: insufficient 'top artist' information in user data")
+		return nil, err
+	}
+	bonus := 50
+	for _, item := range artists.Items {
+		for _, val := range item.Genres {
+			if index, ok := genreExists(val, genreList); ok {
+				genreList[index].addArtist(item.Name)
+				genreList[index].bonus += bonus / 10
+			} else {
+				var temp Genre
+				temp.construct(val, item.Name)
+				temp.bonus = bonus / 10
+				genreList = append(genreList, temp)
+			}
+		}
+		bonus--
+	}
+	if len(genreList) < genreFloorLimit {
+		err = errors.New("extract genres: insufficient amount of genre information extracted")
+		return nil, err
+	}
+	return genreList, nil
+}
+
+// genreExists is a helper function that checks for the given genre title within the given
+// list of Genres and returns a boolean flag representing its existence along with the element's index.
+func genreExists(genre string, list []Genre) (int, bool) {
+	for index, val := range list {
+		if genre == val.title {
+			return index, true
+		}
+	}
+	return 0, false
+}
+
+// calculateTopGenres takes a list of Genres and the desired floor limit of output, and returns an
+// ordered list containing the title of each genre and a separate list of ints containing
+// their respective final scores.
+func calculateTopGenres(floorLimit int, genres []Genre) (titles []string, scores []int, err error) {
+	if floorLimit <= 0 {
+		err = errors.New("calculateTopGenres: invalid 0 or negative floor limit")
+		return nil, nil, err
+	}
+	for floorLimit > 0 {
+		if len(genres) == 0 {
+			return titles, scores, nil
+		}
+		topIndex, err := findTopGenreIndex(genres)
+		if err != nil {
+			return nil, nil, err
+		}
+		titles = append(titles, genres[topIndex].title)
+		scores = append(scores, genres[topIndex].score+genres[topIndex].bonus)
+		recalculateGenreScores(topIndex, genres)
+		floorLimit--
+	}
+	return titles, scores, nil
+}
+
+// findTopGenreIndex thoroughly parses through the given list of Genres and returns the
+// index of the Genre encountered with the highest total score.
+func findTopGenreIndex(genres []Genre) (int, error) {
+	if len(genres) <= 0 {
+		err := errors.New("findTopGenreIndex: genre list is empty")
+		return 0, err
+	}
+	max := 0
+	index := 0
+	for i, val := range genres {
+		if val.score+val.bonus > max {
+			max = val.score + val.bonus
+			index = i
+		}
+	}
+	return index, nil
+}
+
+// recalculateGenreScores parses through the given list of Genres, deleting the the artists encountered
+// in the Genre denoted by the given index from every other Genre object in the list, thus recalculating
+// the scores for every genre affected.
+func recalculateGenreScores(index int, genres []Genre) {
+	artists := make([]string, len(genres[index].artists))
+	copy(artists, genres[index].artists)
+	for i := range genres {
+		for _, artist := range artists {
+			genres[i].removeArtist(artist)
+		}
+	}
+}
+
+// generatePersonalizedPlaylist uses uses an authenticated spotify client and the user's genre
+// statistics as input to generate a playlist of a size denoted by the playlistSize parameter.
+// The required statistics input are two lists and an object that can be retrieved using the
+// generateUserGenreStatistics function and are as follows: a list of the users top genres as strings,
+// a list of the user's genre's top scores as ints stored respective to the previous top genres list,
+// and a topArtists object for the user. The output of the function is a complete FullPlaylist object
+// containing all of the identifying information needed such as ID, URI, Name, Owner, etc.
+func generateUserPlaylist(client *spotify.Client, playlistSize int, topGenres []string, topScores []int, topArtists *spotify.TopArtists) (playlist *spotify.FullPlaylist, err error) {
+	seeds, err := generateSeedsByGenre(topGenres, topArtists.Items)
 	if err != nil {
 		return nil, err
 	}
 
-	seeds, err := generateSeedsByGenre(topGenreTitles, topArtists.Items)
-	if err != nil {
-		return nil, err
-	}
-
-	genreWeights := calculateGenreWeights(topGenreScores)
+	genreWeights := calculateGenreWeights(topScores)
 	tracksPerGenre := calculateTracksPerGenre(genreWeights, playlistSize)
 	recommendations, err := getSeededRecommendations(client, seeds, tracksPerGenre)
 	if err != nil {
@@ -265,122 +415,6 @@ func extractIDsFromRecommendations(recommendations []*spotify.Recommendations) (
 	return trackIDs
 }
 
-// generateUserGenreStatistics uses a spotify client, authorized within the "user-top-read" scope, to generate
-// a list of the user's top 'numberOfGenres' genres and their respective scores within the given
-// time range denoted by timeRange. Note: legal timeRange values are as follows - "short_term", "medium_term",
-// and "long_term", strecthing from 6 weeks, to 6 months, and over several years, respectively.
-func generateUserGenreStatistics(client *spotify.Client, numberOfGenres int, timeRange string) (topGenreTitles []string, topGenreScores []int, topArtists *spotify.TopArtists, err error) {
-	// Gather user's top artists
-	topArtists, err = getUserTopArtists(client, timeRange)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	genres := extractGenres(topArtists)
-	for _, val := range genres {
-		fmt.Println(val)
-	}
-
-	topGenreTitles, topGenreScores = calculateTopGenres(numberOfGenres, genres)
-
-	fmt.Println("Top Genre titles: ", topGenreTitles)
-	fmt.Println("Top Genre scores: ", topGenreScores)
-
-	return topGenreTitles, topGenreScores, topArtists, nil
-}
-
-// getUserTopArtists uses a spotify client, authorized within the "user-top-read" scope, to
-// get the users top 50 artists within the given time range using Spotify endpoints.
-func getUserTopArtists(client *spotify.Client, timeRange string) (top *spotify.TopArtists, err error) {
-	limit := 50
-
-	opt := spotify.Options{
-		Limit:     &limit,
-		Timerange: &timeRange,
-	}
-	top, err = client.CurrentUserTopArtists(&opt)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-
-	return top, nil
-}
-
-// extractGenres parses through a list of artists stored within a TopArtists object in order
-// to return a list of Genre objects with their respective titles, artists, scores, and bonuses
-// set to their correct values.
-func extractGenres(artists *spotify.TopArtists) (genreList []Genre) {
-	bonus := 50
-	for _, item := range artists.Items {
-		for _, val := range item.Genres {
-			if index, ok := genreExists(val, genreList); ok {
-				genreList[index].addArtist(item.Name)
-				genreList[index].bonus += bonus / 10
-			} else {
-				var temp Genre
-				temp.construct(val, item.Name)
-				temp.bonus = bonus / 10
-				genreList = append(genreList, temp)
-			}
-		}
-		bonus--
-	}
-	return genreList
-}
-
-// genreExists is a helper function that checks for the given genre title within the given
-// list of Genres and returns a boolean flag representing its existence along with the element's index.
-func genreExists(genre string, list []Genre) (int, bool) {
-	for index, val := range list {
-		if genre == val.title {
-			return index, true
-		}
-	}
-	return 0, false
-}
-
-// calculateTopGenres takes a list of Genres and the desired limit of output, and returns an
-// ordered list containing the title of each genre and a separate list of ints containing
-// their respective final scores.
-func calculateTopGenres(limit int, genres []Genre) (titles []string, scores []int) {
-	for limit > 0 {
-		topIndex := findTopGenreIndex(genres)
-		titles = append(titles, genres[topIndex].title)
-		scores = append(scores, genres[topIndex].score+genres[topIndex].bonus)
-		recalculateGenreScores(topIndex, genres)
-		limit--
-	}
-	return titles, scores
-}
-
-// findTopGenreIndex thoroughly parses through the given list of Genres and returns the
-// index of the Genre encountered with the highest total score.
-func findTopGenreIndex(genres []Genre) int {
-	max := 0
-	index := 0
-	for i, val := range genres {
-		if val.score+val.bonus > max {
-			max = val.score + val.bonus
-			index = i
-		}
-	}
-	return index
-}
-
-// recalculateGenreScores parses through the given list of Genres, deleting the the artists encountered
-// in the Genre denoted by the given index from every other Genre object in the list, thus recalculating
-// the scores for every genre affected.
-func recalculateGenreScores(index int, genres []Genre) {
-	artists := make([]string, len(genres[index].artists))
-	copy(artists, genres[index].artists)
-	for i := range genres {
-		for _, artist := range artists {
-			genres[i].removeArtist(artist)
-		}
-	}
-}
-
 func completeAuth(w http.ResponseWriter, r *http.Request) {
 	tok, err := auth.Token(state, r)
 	if err != nil {
@@ -391,7 +425,7 @@ func completeAuth(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		log.Fatalf("State mismatch: %s != %s\n", st, state)
 	}
-	// use the token to get an authenticated client
+	// Retrieve authenticated client using token
 	client := auth.NewClient(tok)
 	fmt.Fprintf(w, "Login Completed!")
 	ch <- &client
