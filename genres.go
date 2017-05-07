@@ -1,6 +1,7 @@
 package csci152
 
 import (
+	"errors"
 	"fmt"
 
 	spotify "github.com/ljmeyers80529/spot-go-gae"
@@ -53,26 +54,39 @@ func (g *Genre) removeArtist(artist string) {
 }
 
 // generateUserGenreStatistics uses a spotify client, authorized within the "user-top-read" scope, to generate
-// a list of the user's top 'numberOfGenres' genres and their respective scores within the given
+// a list of the user's top 'numberOfGenres' (limited to 10) genres and their respective scores within the given
 // time range denoted by timeRange. Additionally, the user's top artists are returned as a TopArtists object
 // Note: legal timeRange values are as follows - "short_term", "medium_term", and "long_term", stretching from
 // 6 weeks, to 6 months, and over several years, respectively.
 func generateUserGenreStatistics(client *spotify.Client, numberOfGenres int, timeRange string) (topGenreTitles []string, topGenreScores []int, topArtists *spotify.TopArtists, err error) {
 	// Gather user's top artists
+	if numberOfGenres > 10 {
+		err = errors.New("number of genre's requested exceeds 10")
+		return nil, nil, nil, err
+	}
+
+	if !(timeRange == "short_term" || timeRange == "medium_term" || timeRange == "long_term") {
+		err = errors.New("invalid time range input")
+		return nil, nil, nil, err
+	}
+
 	topArtists, err = getUserTopArtists(client, timeRange)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	genres := extractGenres(topArtists)
+	genres, err := extractGenres(topArtists, numberOfGenres)
+	if err != nil {
+		return nil, nil, nil, err
+	}
 	for _, val := range genres {
 		fmt.Println(val)
 	}
 
-	topGenreTitles, topGenreScores = calculateTopGenres(numberOfGenres, genres)
-
-	fmt.Println("Top Genre titles: ", topGenreTitles)
-	fmt.Println("Top Genre scores: ", topGenreScores)
+	topGenreTitles, topGenreScores, err = calculateTopGenres(numberOfGenres, genres)
+	if err != nil {
+		return nil, nil, nil, err
+	}
 
 	return topGenreTitles, topGenreScores, topArtists, nil
 }
@@ -98,7 +112,11 @@ func getUserTopArtists(client *spotify.Client, timeRange string) (top *spotify.T
 // extractGenres parses through a list of artists stored within a TopArtists object in order
 // to return a list of Genre objects with their respective titles, artists, scores, and bonuses
 // set to their correct values.
-func extractGenres(artists *spotify.TopArtists) (genreList []Genre) {
+func extractGenres(artists *spotify.TopArtists, genreFloorLimit int) (genreList []Genre, err error) {
+	if len(artists.Items) < 25 {
+		err = errors.New("extract genres: insufficient 'top artist' information in user data")
+		return nil, err
+	}
 	bonus := 50
 	for _, item := range artists.Items {
 		for _, val := range item.Genres {
@@ -114,7 +132,11 @@ func extractGenres(artists *spotify.TopArtists) (genreList []Genre) {
 		}
 		bonus--
 	}
-	return genreList
+	if len(genreList) < genreFloorLimit {
+		err = errors.New("extract genres: insufficient amount of genre information extracted")
+		return nil, err
+	}
+	return genreList, nil
 }
 
 // genreExists is a helper function that checks for the given genre title within the given
@@ -128,23 +150,37 @@ func genreExists(genre string, list []Genre) (int, bool) {
 	return 0, false
 }
 
-// calculateTopGenres takes a list of Genres and the desired limit of output, and returns an
+// calculateTopGenres takes a list of Genres and the desired floor limit of output, and returns an
 // ordered list containing the title of each genre and a separate list of ints containing
 // their respective final scores.
-func calculateTopGenres(limit int, genres []Genre) (titles []string, scores []int) {
-	for limit > 0 {
-		topIndex := findTopGenreIndex(genres)
+func calculateTopGenres(floorLimit int, genres []Genre) (titles []string, scores []int, err error) {
+	if floorLimit <= 0 {
+		err = errors.New("calculateTopGenres: invalid 0 or negative floor limit")
+		return nil, nil, err
+	}
+	for floorLimit > 0 {
+		if len(genres) == 0 {
+			return titles, scores, nil
+		}
+		topIndex, err := findTopGenreIndex(genres)
+		if err != nil {
+			return nil, nil, err
+		}
 		titles = append(titles, genres[topIndex].title)
 		scores = append(scores, genres[topIndex].score+genres[topIndex].bonus)
 		recalculateGenreScores(topIndex, genres)
-		limit--
+		floorLimit--
 	}
-	return titles, scores
+	return titles, scores, nil
 }
 
 // findTopGenreIndex thoroughly parses through the given list of Genres and returns the
 // index of the Genre encountered with the highest total score.
-func findTopGenreIndex(genres []Genre) int {
+func findTopGenreIndex(genres []Genre) (int, error) {
+	if len(genres) <= 0 {
+		err := errors.New("findTopGenreIndex: genre list is empty")
+		return 0, err
+	}
 	max := 0
 	index := 0
 	for i, val := range genres {
@@ -153,7 +189,7 @@ func findTopGenreIndex(genres []Genre) int {
 			index = i
 		}
 	}
-	return index
+	return index, nil
 }
 
 // recalculateGenreScores parses through the given list of Genres, deleting the the artists encountered
