@@ -59,9 +59,10 @@ func WriteNewUserInformation(res http.ResponseWriter, req *http.Request) (regist
 	var err error
 
 	ctx := appengine.NewContext(req)
+
 	pass := req.FormValue("newpassword")
 	conf := req.FormValue("confirm")
-	spot := req.FormValue("spotifyaccount")
+	spot := "X1"
 	un := req.FormValue("newusername")
 
 	names.Name = un
