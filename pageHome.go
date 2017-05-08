@@ -41,7 +41,8 @@ func pageHome(res http.ResponseWriter, req *http.Request) {
 	log.Infof(ctx, "Term = %s", term)
 	webInformation.User.Username = spotifyUser()
 	initSpotify(res, req)
-	if clientOK() {
+	ok := clientOK()
+	if ok {
 		tgl, tgs, ta, err := generateUserGenreStatistics(&spotClient, 7, term)
 		if err != nil {
 			log.Infof(ctx, "err: %v", err)
@@ -52,6 +53,7 @@ func pageHome(res http.ResponseWriter, req *http.Request) {
 			} else {
 				webInformation.User.UserPlaylistID = string(playlist.URI)
 				log.Infof(ctx, "succeed: should")
+				log.Infof(ctx, string(playlist.URI))
 			}
 		}
 		// ctx := appengine.NewContext(req)
@@ -70,6 +72,7 @@ func pageHome(res http.ResponseWriter, req *http.Request) {
 			webInformation.Radar.Labels = []string{"Soft Rock", "Heavy Metal", "Rap", "Classical", "Adult"}
 		}
 	}
+	log.Infof(ctx, "ok: %v", ok)
 	tpl.ExecuteTemplate(res, "homepage.html", webInformation)
 }
 
