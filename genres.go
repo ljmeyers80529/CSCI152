@@ -3,6 +3,7 @@ package csci152
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 
 	spotify "github.com/ljmeyers80529/spot-go-gae"
 )
@@ -202,5 +203,13 @@ func recalculateGenreScores(index int, genres []Genre) {
 		for _, artist := range artists {
 			genres[i].removeArtist(artist)
 		}
+	}
+}
+
+func shuffleListsInParallel(topGenres []string, topScores []int) {
+	for i := range topGenres {
+		j := rand.Intn(i + 1)
+		topGenres[i], topGenres[j] = topGenres[j], topGenres[i]
+		topScores[i], topScores[j] = topScores[j], topScores[i]
 	}
 }
