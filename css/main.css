@@ -27,7 +27,7 @@ header {
 }
 
 
-/*fucks wit logo on nav bar */
+/*messes wit logo on nav bar */
 
 #navlogo {
     float: left;
@@ -173,6 +173,7 @@ header {
 #btf {
     display: flex;
     flex-direction: row;
+    justify-content: space-around;
 }
 
 #container1 {
@@ -200,6 +201,14 @@ header {
     margin-left: 100px;
 }
 
+#container5 {
+    text-align: center;
+    float: left;
+    width: 40%;
+    padding: 10px;
+    margin-left: 100px;
+}
+
 
 /*
 #container2{
@@ -212,6 +221,7 @@ header {
 #player {
     float: right;
     margin-top: 5%;
+    margin-right: 5%;
 }
 
 #playerLogIn {

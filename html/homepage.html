@@ -74,7 +74,7 @@
 
         </div>
 
-        <div class="btf1">
+        <div class="btf">
             <div id="th">
                 <div id="container1">
                     <h1>Taste Taste</h1>
@@ -125,6 +125,9 @@
                                     },
                                     gridLines: {
                                         color: 'rgba(0,255,0,0.2)'
+                                    },
+                                    ticks: {
+                                        backdropColor: 'rgba(0,255,0,0.0)',
                                     }
                                 }
                             }
@@ -144,12 +147,12 @@
         <!-- ---------------------THIS SECTION WILL BE FOR THE STUFF NOT SHOWN IF USER IS LOGGED IN-------------------------------- -->
 
         {{else}}
-        <div class="btf1">
-            <div id="player">
+        <div class="atf">
+            <div id="container1">
                 <iframe src="https://embed.spotify.com/?uri={{.User.UserPlaylistID}}" width="720" height="620" frameborder="0"></iframe>
             </div>
 
-            <div id="bf">
+            <!--<div id="bf">-->
                 <div id="container2">
                     <h1>{{.User.SpotifyUsername}} Genre Distrubution Graph</h1>
                     <canvas id="radarChart" height="600" width="600"></canvas>
@@ -181,7 +184,6 @@
                                     },
                                     ticks: {
                                         backdropColor: 'rgba(0,255,0,0.0)',
-                                        
                                     }
                                 }
                             }
@@ -193,7 +195,7 @@
             <a href="/home?term=long" class="button heart"></a>
         </div>
                 </div>
-            </div>
+            <!--</div>-->
             {{end}}
 		<script src="../js/ajax.js"></script>
     </body>
