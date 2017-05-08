@@ -1,3 +1,7 @@
+//build +ignore
+
+package csci152
+
 // package main
 
 // import (
