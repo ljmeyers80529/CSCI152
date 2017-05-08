@@ -87,7 +87,7 @@ header {
     /*messes with text on nav*/
     color: #000000;
     text-decoration: none;
-    font-family: "Eras Bold ITC";
+    font-family: "sans-serif";
 }
 
 
@@ -337,8 +337,12 @@ login {
     font-size: 20px;
     top: 30%;
     right: 55%;
+    font-size: 17px;
+    top: 34%;
+    right: 65%;
     font-weight: bold;
 }
+
 
 .tick:after {
     content: "Trending";
@@ -352,6 +356,7 @@ login {
 .cross:after {
     content: "Standard";
     align-items: center;
+    left: 10%;
     font-size: 19px;
     top: 35%;
     font-weight: bold;
