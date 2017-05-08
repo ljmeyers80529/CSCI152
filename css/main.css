@@ -87,7 +87,7 @@ header {
     /*messes with text on nav*/
     color: #000000;
     text-decoration: none;
-    font-family: sans-serif;
+    font-family: "Eras Bold ITC";
 }
 
 
@@ -166,7 +166,7 @@ header {
     height: 100vh;
     display: flex;
     flex-direction: row;
-    background: url("../images/HeadphoneHomepage1.jpg") no-repeat center center;
+    background: url("../img/HeadphoneHomepage1.jpg") no-repeat center center;
     background-size: cover;
 }
 
@@ -215,7 +215,6 @@ header {
     float: right;
     width: 33.3%;    padding: 8px;
 }\ No newline at end of file
-
 */
 
 #player {
@@ -227,7 +226,7 @@ header {
 #playerLogIn {
     float: left;
     width: 75%;
-    background: url("../images/HeadphoneHomepage1.jpg");
+    background: url("../img/HeadphoneHomepage1.jpg");
     background-size: cover;
 }
 
@@ -279,14 +278,14 @@ content {
 login {
     display: inline-block;
     width: 25%;
-    background: url("../images/loginbg.jpg");
+    background: url("../img/loginbg.jpg");
     background-size: cover;
 }
 
 #th {
     display: inline-block;
     width: 100%;
-    background: url("../images/btf1.jpg")fixed;
+    background: url("../img/btf1.jpg")fixed;
     background-size: cover;
 }
 
@@ -294,41 +293,9 @@ login {
     display: inline-block;
     width: 100%;
     height: 100%;
-    background: url("../images/test4.jpg")fixed;
+    background: url("../img/test4.jpg")fixed;
     background-size: cover;
 }
-
-/*----------------------------Logged In section-----------------------------*/
-.btf1{
-    display: inline-block;
-    width: 100%;
-    height: 100%;
-    background: url("../images/btf1.jpg")fixed;
-    background-size: cover;
-
-}
-
-#player{
-    float: left;
-    width: 45%;
-    height: 100%;
-    opacity: .8;
-    margin-top: 5%;
-}
-
-#container2{
-    float: right;
-    width: 45%;
-    height: 100%;
-    text-align: center;
-
-}
-
-
-
-
-
-
 
 
 /*----------------------------CSS FOR buttons-----------------------*/
@@ -367,9 +334,9 @@ login {
 .heart:after {
     content: "Throwback";
     align-items: center;
-    font-size: 17px;
-    top: 34%;
-    right: 65%;
+    font-size: 20px;
+    top: 30%;
+    right: 55%;
     font-weight: bold;
 }
 
@@ -385,7 +352,6 @@ login {
 .cross:after {
     content: "Standard";
     align-items: center;
-    left: 10%;
     font-size: 19px;
     top: 35%;
     font-weight: bold;
