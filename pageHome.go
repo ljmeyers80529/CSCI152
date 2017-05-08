@@ -40,6 +40,7 @@ func pageHome(res http.ResponseWriter, req *http.Request) {
 	}
 	log.Infof(ctx, "Term = %s", term)
 	webInformation.User.Username = spotifyUser()
+	initSpotify(res, req)
 	if clientOK() {
 		tgl, tgs, ta, err := generateUserGenreStatistics(&spotClient, 7, term)
 		if err == nil {
