@@ -323,7 +323,7 @@ login {
 }
 
 .heart:after {
-    content: "Recent";
+    content: "Throwback";
     align-items: center;
     font-size: 20px;
     top: 30%;
@@ -341,7 +341,7 @@ login {
 }
 
 .cross:after {
-    content: "Throwback";
+    content: "Standard";
     align-items: center;
     font-size: 19px;
     top: 35%;
