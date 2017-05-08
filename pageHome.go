@@ -62,7 +62,7 @@ func pageHome(res http.ResponseWriter, req *http.Request) {
 		// log.Infof(ctx, "ta: %v", ta)
 		log.Infof(ctx, "err: %v", err)
 		if err == nil {
-			shuffleListsInParallel(tgs, tgl)
+			shuffleListsInParallel(tgl, tgs)
 			webInformation.User.SpotifyUsername = webInformation.User.Username
 			webInformation.Radar.Data = tgs
 			webInformation.Radar.Labels = tgl
