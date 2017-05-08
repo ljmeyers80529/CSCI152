@@ -25,7 +25,6 @@
                 <li class="dropdown">
                     <a href="#drop">{{.User.Username}}</a>
                     <div class="dropdown-content">
-                        <a href="#">Settings</a>
                         <a href="/logout">Signout</a>
                     </div>
                 </li>
@@ -74,7 +73,7 @@
 
         </div>
 
-        <div class="btf">
+        <div class="btf1">
             <div id="th">
                 <div id="container1">
                     <h1>Taste Taste</h1>
@@ -125,9 +124,6 @@
                                     },
                                     gridLines: {
                                         color: 'rgba(0,255,0,0.2)'
-                                    },
-                                    ticks: {
-                                        backdropColor: 'rgba(0,255,0,0.0)',
                                     }
                                 }
                             }
@@ -147,15 +143,14 @@
         <!-- ---------------------THIS SECTION WILL BE FOR THE STUFF NOT SHOWN IF USER IS LOGGED IN-------------------------------- -->
 
         {{else}}
-        <div class="atf">
-            <div id="container1">
-                <iframe src="https://embed.spotify.com/?uri={{.User.UserPlaylistID}}" width="720" height="620" frameborder="0"></iframe>
+        <div class="btf1">
+            <div id="player">
+                <iframe src="https://embed.spotify.com/?uri={{.User.UserPlaylistID}}" width="600" height="600" frameborder="0"></iframe>
             </div>
 
-            <!--<div id="bf">-->
                 <div id="container2">
                     <h1>{{.User.SpotifyUsername}} Genre Distrubution Graph</h1>
-                    <canvas id="radarChart" height="600" width="600"></canvas>
+                    <canvas id="radarChart" height="420" width="420"></canvas>
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
                     <script>
                         var CHART = document.getElementById("radarChart");
@@ -181,10 +176,6 @@
                                     },
                                     gridLines: {
                                         color: 'rgba(0,255,0,0.2)'
-                                    },
-                                    ticks: {
-                                        backdropColor: 'rgba(0,255,0,0.0)',
-                                        beginAtZero: true
                                     }
                                 }
                             }
@@ -196,7 +187,6 @@
             <a href="/home?term=long" class="button heart"></a>
         </div>
                 </div>
-            <!--</div>-->
             {{end}}
 		<script src="../js/ajax.js"></script>
     </body>
