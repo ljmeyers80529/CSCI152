@@ -10,5 +10,5 @@ const retrieveURI string = "http://localhost:8080/callback"                 // r
 const spotStateValue string = "DevTest"                                     // spotify session id / state value.
 const shortPlaylistName string = "Your Personalized Taste Test - Trending"  // short playlist creation name
 const mediumPlaylistName string = "Your Personalized Taste Test - Standard" // medium playlist creation name
-const longPlaylistName string = "Your Personilzed Taste Test - Throwback"   // long playlist creation name
+const longPlaylistName string = "Your Personalized Taste Test - Throwback"  // long playlist creation name
 const playlistSizeConst = 30                                                //size of playlist to generate
