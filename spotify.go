@@ -42,7 +42,7 @@ func clientOK() bool {
 
 // get spotify username.
 func spotifyUser() string {
-	var user = "ZZZZZ"
+	var user = "User"
 
 	if clientOK() {
 		cu, err := spotClient.CurrentUser()

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"math/rand"
 	"net/http"
 
 	spotify "github.com/ljmeyers80529/spot-go-gae"
@@ -60,17 +61,23 @@ func main() {
 	// 	return
 	// }
 
-	topGenres, topScores, topArtists, err := generateUserGenreStatistics(client, 3, "long_term")
+	topGenres, topScores, _, err := generateUserGenreStatistics(client, 7, "long_term")
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	_, err = generateUserPlaylist(client, 30, topGenres, topScores, topArtists)
-	if err != nil {
-		log.Println(err)
-		return
-	}
+	// _, err = generateUserPlaylist(client, 30, topGenres, topScores, topArtists)
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
+
+	fmt.Println(topGenres)
+	fmt.Println(topScores)
+	shuffleListsInParallel(topGenres, topScores)
+	fmt.Println(topGenres)
+	fmt.Println(topScores)
 
 	client2 := <-ch2
 	fmt.Println(client2)
@@ -429,4 +436,12 @@ func completeAuth(w http.ResponseWriter, r *http.Request) {
 	client := auth.NewClient(tok)
 	fmt.Fprintf(w, "Login Completed!")
 	ch <- &client
+}
+
+func shuffleListsInParallel(topGenres []string, topScores []int) {
+	for i := range topGenres {
+		j := rand.Intn(i + 1)
+		topGenres[i], topGenres[j] = topGenres[j], topGenres[i]
+		topScores[i], topScores[j] = topScores[j], topScores[i]
+	}
 }
