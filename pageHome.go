@@ -41,10 +41,13 @@ func pageHome(res http.ResponseWriter, req *http.Request) {
 	log.Infof(ctx, "Term = %s", term)
 	webInformation.User.Username = spotifyUser()
 	if clientOK() {
-		//webInformation.User.UserPlaylistID = getLoggedInUsersPlaylist(res, req)
 		tgl, tgs, ta, err := generateUserGenreStatistics(&spotClient, 7, term)
-		playlist, err := generateUserPlaylist(&spotClient, playlistSizeConst, term, tgl, tgs, ta)
-		webInformation.User.UserPlaylistID = string(playlist.URI)
+		if err == nil {
+			playlist, err := generateUserPlaylist(&spotClient, playlistSizeConst, term, tgl, tgs, ta)
+			if err == nil {
+				webInformation.User.UserPlaylistID = string(playlist.URI)
+			}
+		}
 		// ctx := appengine.NewContext(req)
 		log.Infof(ctx, "tgl: %v", tgl)
 		log.Infof(ctx, "tgs: %v", tgs)
@@ -55,6 +58,7 @@ func pageHome(res http.ResponseWriter, req *http.Request) {
 			webInformation.Radar.Data = tgs
 			webInformation.Radar.Labels = tgl
 		} else {
+			webInformation.User.UserPlaylistID = getLoggedInUsersPlaylist(res, req)
 			webInformation.User.SpotifyUsername = "Sample"
 			webInformation.Radar.Data = []int{55, 45, 11, 46, 44}
 			webInformation.Radar.Labels = []string{"Soft Rock", "Heavy Metal", "Rap", "Classical", "Adult"}
