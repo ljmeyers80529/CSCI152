@@ -29,7 +29,7 @@ func initSpotify(res http.ResponseWriter, req *http.Request) {
 	// ctx := appengine.NewContext(req)
 	// log.Infof(ctx, "Spot login state: %v", webInformation.User.SpotLogged)
 	if !webInformation.User.SpotLogged {
-		auth = spotify.NewAuthenticator(retrieveURI, spotify.ScopeUserReadRecentlyPlayed, spotify.ScopeUserTopRead)
+		auth = spotify.NewAuthenticator(retrieveURI, spotify.ScopePlaylistModifyPublic, spotify.ScopeUserTopRead)
 		auth.SetAuthInfo(clientID, spotKey)
 		http.Redirect(res, req, auth.AuthURL(spotStateValue), http.StatusFound)
 	}

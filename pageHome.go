@@ -43,10 +43,15 @@ func pageHome(res http.ResponseWriter, req *http.Request) {
 	initSpotify(res, req)
 	if clientOK() {
 		tgl, tgs, ta, err := generateUserGenreStatistics(&spotClient, 7, term)
-		if err == nil {
+		if err != nil {
+			log.Infof(ctx, "err: %v", err)
+		} else {
 			playlist, err := generateUserPlaylist(&spotClient, playlistSizeConst, term, tgl, tgs, ta)
-			if err == nil {
+			if err != nil {
+				log.Infof(ctx, "err: %v", err)
+			} else {
 				webInformation.User.UserPlaylistID = string(playlist.URI)
+				log.Infof(ctx, "succeed: should")
 			}
 		}
 		// ctx := appengine.NewContext(req)
