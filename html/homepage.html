@@ -146,13 +146,12 @@
         {{else}}
         <div class="btf1">
             <div id="player">
-                <iframe src="https://embed.spotify.com/?uri={{.User.UserPlaylistID}}" width="720" height="620" frameborder="0"></iframe>
+                <iframe src="https://embed.spotify.com/?uri={{.User.UserPlaylistID}}" width="600" height="600" frameborder="0"></iframe>
             </div>
 
-            <div id="bf">
                 <div id="container2">
                     <h1>{{.User.SpotifyUsername}} Genre Distrubution Graph</h1>
-                    <canvas id="radarChart" height="600" width="600"></canvas>
+                    <canvas id="radarChart" height="420" width="420"></canvas>
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
                     <script>
                         var CHART = document.getElementById("radarChart");
@@ -189,7 +188,6 @@
             <a href="/home?term=long" class="button heart"></a>
         </div>
                 </div>
-            </div>
             {{end}}
 		<script src="../js/ajax.js"></script>
     </body>
